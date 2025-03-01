@@ -41,9 +41,6 @@
 			   padding: 14px 10px;
 			   line-height: 1.35;
 			}
-			.popup-msg-box a{
-				text-decoration: none;
-			}
 			.popup-onload{
 				margin: 0 auto;
 				display: none;
@@ -52,15 +49,15 @@
 				top: 50%;
 				left: 50%;
 				margin-top: -500px;
-				margin-left: -500px;
+				margin-left: -22vw;
 			}
 			.popup-msg-box{
 				overflow-y: scroll;
-				min-width: 800px;
-				width: 800px;
+				min-width: 500px;
+				width: 36vw;
 				min-height: 500px;
-				height: 500px;
-				margin: 100px 100px;
+				height: 30vh;
+				margin: 10vh 10vh;
 				background: rgba(255,255,255,0.5);
 				position: relative;
 				z-index: 103;
@@ -76,20 +73,10 @@
 		    font-family: sans-serif;
 			}
 			.popup-msg-box a{
+				text-decoration: none;
 		    color: firebrick;
 			}
-			/* .popup-msg-box .x{
-				float: right;
-				height: 35px;
-				left: 22px;
-				position: relative;
-				top: -25px;
-				width: 34px;
-			}
-			.popup-msg-box .x:hover{
-				cursor: pointer;
-			} */
-    </style>
+		</style>
 
 <!-- ----------- START WHERE THE MARIMO CONTENT GOES HERE ---------- -->
 
@@ -122,7 +109,7 @@
           <span style="font-weight:bold">MapWeaver</span> offers a range of tiling options including some that give the appearance of woven material.
 				</p>
 				<br>
-				<img src="images/img5-three-weaves.png">
+				<img src="images/img5-three-weaves.png" style="width:100%;">
 				<br>
 				<p>
 					To see more examples, visit the <a href="https://github.com/DOSull/weaving-space" target="_blank">github repo for the underlying <span style="font-family:monospace;">weavingspace</span> code</a>, where you will also find materials on the thinking behind <span style="font-weight:bold;">MapWeaver</span>.
