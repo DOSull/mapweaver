@@ -4,7 +4,6 @@ __generated_with = "0.11.19"
 app = marimo.App(
     width="full",
     app_title="MapWeaver",
-    layout_file="layouts/app.grid.json",
     css_file="",
     html_head_file="splash.html",
 )
@@ -14,7 +13,7 @@ app = marimo.App(
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.03.15</span>").style({'background-color':'rgba(255,255,255,0.5'}),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.03.14-22:45</span>").style({'background-color':'rgba(255,255,255,0.5'}),
     ]).left()
     return
 
@@ -384,26 +383,24 @@ def setup_tiling_modifiers(
 ):
     # mo.stop(tiling_map)
     if tile_or_weave.value == "tiling":
-        _str = f"""
-            #### Spacing {tool_tip(spacing, 'In units of the map CRS, the approximate dimension of the repeating group.')}
-            #### Rotate by {tool_tip(tile_rotate, 'Rotate tiling (degrees). Note that the tile group is rotated before any scaling or skew transforms are applied.')}
-            #### Scale left-right {tool_tip(tile_scale_x, 'Scale in the x direction.')}
-            #### Scale up-down {tool_tip(tile_scale_y, 'Scale in the y direction.')}
-            #### Skew left-right {tool_tip(tile_skew_x, 'Skew in the x direction (degrees).')}
-            #### Skew up-down {tool_tip(tile_skew_y, 'Skew in the y direction (degrees).')}
-            #### Tile group inset {tool_tip(p_inset, 'Inset the tile group (% spacing).')}
-            #### Tiles inset {tool_tip(t_inset, 'Inset individual tiles (% spacing).')}
-            """
+        _str = "\n".join([
+            f"#### Spacing {tool_tip(spacing, 'In units of the map CRS, the approximate dimension of the repeating group.')}",
+            f"#### Rotate by {tool_tip(tile_rotate, "Rotate tiling (degrees). Note that the tile group is rotated before any skews are applied.")}",
+            f"#### Scale left-right {tool_tip(tile_scale_x, "Scale in the x direction.")}",
+            f"#### Scale up-down {tool_tip(tile_scale_y, "Scale in the y direction.")}",
+            f"#### Skew left-right {tool_tip(tile_skew_x, "Skew in the x direction (degrees).")}",
+            f"#### Skew up-down {tool_tip(tile_skew_y, "Skew in the y direction (degrees).")}",
+            f"#### Tile group inset {tool_tip(p_inset, "Inset the tile group (% spacing).")}",
+            f"#### Tiles inset {tool_tip(t_inset, "Inset individual tiles (% spacing).")}"])
     else:
-        _str = f"""
-            #### Spacing {tool_tip(spacing, 'In units of the map CRS, the distance between strand centre lines.')}
-            #### Rotate by {tool_tip(tile_rotate, "'Rotate weave (degrees). Note that the weave is rotated before any scaling or skew transforms are applied.'")}
-            #### Scale left-right {tool_tip(tile_scale_x, "'Scale in the x direction.'")}
-            #### Scale up-down {tool_tip(tile_scale_y, "'Scale in the y direction.'")}
-            #### Skew left-right {tool_tip(tile_skew_x, "'Skew in the x direction (degrees).'")}
-            #### Skew up-down {tool_tip(tile_skew_y, "'Skew in the y direction (degrees).'")}
-            #### Strands inset {tool_tip(t_inset, "'Inset strands (% width).'")}
-            """
+        _str = "\n".join([
+            f"#### Spacing {tool_tip(spacing, 'In units of the map CRS, the distance between strand centre lines.')}",
+            f"#### Rotate by {tool_tip(tile_rotate, "Rotate weave (degrees). Note that the weave is rotated before any skews are applied.")}",
+            f"#### Scale left-right {tool_tip(tile_scale_x, "Scale in the x direction.")}",
+            f"#### Scale up-down {tool_tip(tile_scale_y, "Scale in the y direction.")}",
+            f"#### Skew left-right {tool_tip(tile_skew_x, "Skew in the x direction (degrees).")}",
+            f"#### Skew up-down {tool_tip(tile_skew_y, "Skew in the y direction (degrees).")}",
+            f"#### Strands inset {tool_tip(t_inset, "Inset strands (% width).")}"])
     mo.md(_str)
     return
 
@@ -412,7 +409,7 @@ def setup_tiling_modifiers(
 def tiling_or_weave_chooser(mo, num_tiles, tilings_by_n, tool_tip):
     _options = list(set([v["type"] for v in tilings_by_n[num_tiles.value].values()]))
     tile_or_weave = mo.ui.dropdown(options=_options, value="tiling", label="#### Pick tiling or weave")
-    mo.md(f"{tool_tip(tile_or_weave, 'Choose tiling or a weave tiling')}")
+    mo.md(f"{tool_tip(tile_or_weave, "Choose tiling or a weave tiling")}")
     return (tile_or_weave,)
 
 
