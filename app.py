@@ -14,7 +14,7 @@ app = marimo.App(
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.03.21</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.03.22</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
     ])
     return
 
@@ -240,8 +240,9 @@ def _(get_gdf, get_modded_tile_unit, wsp):
 def _(get_selected_colour_palettes, get_tile_ids, get_variables, tiled_map):
     tiled_map.variables =  {k: v for k, v in zip(get_tile_ids(),  get_variables())}
     tiled_map.colourmaps = {k: v for k, v in zip(get_variables(), get_selected_colour_palettes())}
-    tiled_map.render(legend=False, scheme="EqualInterval")
-    return
+    result = tiled_map.render(legend=False, scheme="EqualInterval")
+    result
+    return (result,)
 
 
 @app.cell(hide_code=True)
