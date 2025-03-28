@@ -250,7 +250,7 @@ def _(get_gdf, get_modded_tile_unit, wsp):
 def _(get_selected_colour_palettes, get_variables, tiled_map):
     tiled_map.vars_to_map = get_variables()
     tiled_map.colors_to_use = get_selected_colour_palettes()
-    result = tiled_map.render(legend=False, scheme="EqualInterval")
+    result = tiled_map.render(legend=False)
     result
     return (result,)
 
