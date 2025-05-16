@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.11.30"
+__generated_with = "0.13.6"
 app = marimo.App(
     width="full",
     app_title="MapWeaver",
@@ -10,113 +10,14 @@ app = marimo.App(
 )
 
 
-@app.cell(hide_code=True)
-def _(centred, mo):
-    mo.vstack([
-        mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.04.22</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
-        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.73</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
-    ])
+@app.cell
+def upload_data(mo, set_input_data):
+    _file_browser = mo.ui.file(filetypes=[".geojson", ".json"], on_change=set_input_data, label=f"Upload")
+    mo.md(f"{tool_tip(_file_browser, "Your data should be polygons. Currently only GeoJSON formatted data is readable.")}")
     return
 
 
-@app.cell(hide_code=True)
-def module_imports():
-    import io                     # for in-memory loading of inputs and outputs
-    from pathlib import Path
-    from typing import Union
-    from itertools import zip_longest
-    import matplotlib as mpl
-    import math
-    import pandas as pd
-    import geopandas as gpd
-    from shapely import is_valid
-    import weavingspace as wsp
-    from weavingspace import CMAPS_SEQUENTIAL
-    from weavingspace import CMAPS_DIVERGING
-    return (
-        CMAPS_DIVERGING,
-        CMAPS_SEQUENTIAL,
-        Path,
-        Union,
-        gpd,
-        io,
-        is_valid,
-        math,
-        mpl,
-        pd,
-        wsp,
-        zip_longest,
-    )
-
-
-@app.cell(hide_code=True)
-def globals(CMAPS_DIVERGING, CMAPS_SEQUENTIAL, get_colour_ramp, gpd):
-    ok_message = "STATUS All good!"
-    dummy_data_file = "https://raw.githubusercontent.com/DOSull/weaving-space/refs/heads/main/examples/data/dummy-data.json"
-    builtin_gdf = gpd.read_file(dummy_data_file, engine="fiona")
-    available_palettes = [pal for pal in CMAPS_SEQUENTIAL + CMAPS_DIVERGING if pal[-2:] != "_r" and 
-                         pal not in ["berlin", "managua", "vanimo"]] # these don't seem to be in MPL3.8.4
-    # make a bunch of colour ramps and save them in a dictionary so we only
-    # have to make them at notebook initialisation
-    color_ramps = {k: get_colour_ramp(k) 
-                   for k in available_palettes + [p + "_r" for p in available_palettes]}
-    return (
-        available_palettes,
-        builtin_gdf,
-        color_ramps,
-        dummy_data_file,
-        ok_message,
-    )
-
-
-@app.cell(hide_code=True)
-def marimo_states(
-    available_palettes,
-    builtin_gdf,
-    dummy_data_file,
-    mo,
-    ok_message,
-):
-    # mo.state() variables so that some of app attributes persist in use
-    # the input data source
-    get_input_data, set_input_data = mo.state(dummy_data_file)
-    # the GeoDataframe we are tiling - using state means we can restore
-    # current GDF if a new one has issues 
-    get_gdf, set_gdf = mo.state(builtin_gdf)
-    # variables currently selected by the user
-    get_variables, set_variables = mo.state([])
-    # palettes currently selected by the user
-    get_palettes, set_palettes = mo.state(available_palettes)
-    # palette reverse settings
-    get_reversed, set_reversed = mo.state([])
-    # app status message
-    get_status_message, set_status_message = mo.state(ok_message)
-    return (
-        get_gdf,
-        get_input_data,
-        get_palettes,
-        get_reversed,
-        get_status_message,
-        get_variables,
-        set_gdf,
-        set_input_data,
-        set_palettes,
-        set_reversed,
-        set_status_message,
-        set_variables,
-    )
-
-
-@app.cell(hide_code=True)
-def upload_data(mo, set_input_data, tool_tip):
-    _file_browser = mo.ui.file(filetypes=[".geojson", ".json"], 
-                    on_change=set_input_data, label=f"Upload")
-    mo.md(f"{tool_tip(_file_browser, "Your data should be polygons. Currently only GeoJSON formatted data is readable.")}").left()
-    return
-
-
-@app.cell(hide_code=True)
+@app.cell
 def read_gdf(
     builtin_gdf,
     get_gdf,
@@ -184,15 +85,15 @@ def read_gdf(
     return
 
 
-@app.cell(hide_code=True)
-def _(mo, tool_tip):
+@app.cell
+def set_download_type(mo):
     download_type = mo.ui.dropdown(options=["GeoJSON", "GeoPackage", "SVG", "PNG"], value="GeoJSON")
     mo.md(f"{tool_tip(download_type, 'Set the file format for downloaded map data')}")
     return (download_type,)
 
 
-@app.cell(hide_code=True)
-def _(
+@app.cell
+def download_result(
     Path,
     download_type,
     get_input_data,
@@ -201,7 +102,6 @@ def _(
     result,
     tiled_map,
     tiling_map,
-    tool_tip,
 ):
     mo.stop(tiling_map)
     if isinstance(get_input_data(), str) or len(get_input_data()) == 0:
@@ -210,47 +110,44 @@ def _(
         _fname = f"{Path(get_input_data()[0].name).stem}-map-weaver-map"
 
     if download_type.value == "GeoJSON":
-        _download_button = mo.download(data=tiled_map.map.to_json().encode('utf-8'), 
-                                       filename=f'{_fname}.geojson', 
-                                       mimetype='text/plain', 
-                                       label='Download')
+        _download_button = mo.download(
+            data=tiled_map.map.to_json().encode('utf-8'), filename=f'{_fname}.geojson', mimetype='text/plain', label='Download')
     elif download_type.value == "GeoPackage":
         # here we have to use a BytesIO stream to write to
         with io.BytesIO() as _f:
             tiled_map.map.to_file(_f, driver="GPKG", engine="fiona")
-            _download_button = mo.download(data=_f, 
-                                           filename=f'{_fname}.gpkg', 
-                                           mimetype="application/geopackage+sqlite3",
-                                           label='Download')
+            _download_button = mo.download(
+                data=_f, filename=f'{_fname}.gpkg', mimetype="application/geopackage+sqlite3", label='Download')
     elif download_type.value == "SVG":
         with io.BytesIO() as _f:
             result.savefig(_f, format="svg")
-            _download_button = mo.download(data=_f,
-                                           filename=f'{_fname}.svg',
-                                           mimetype="image/svg+xml",
-                                           label="Download")
+            _download_button = mo.download(
+                data=_f, filename=f'{_fname}.svg', mimetype="image/svg+xml", label="Download")
     else:
         with io.BytesIO() as _f:
             result.savefig(_f, format="png", dpi=300)
-            _download_button = mo.download(data=_f,
-                                           filename=f'{_fname}.png',
-                                           mimetype="image/png",
-                                           label="Download")
+            _download_button = mo.download(
+                data=_f, filename=f'{_fname}.png', mimetype="image/png", label="Download")
 
     mo.md(f'{tool_tip(_download_button, "Download the tiled map")}')
     return
 
 
 @app.cell
-def _(get_gdf, get_modded_tile_unit, wsp):
+def get_tiled_map(get_gdf, get_modded_tile_unit, wsp):
     tiling_map = True # flag to block some other cells (potentially...)
     tiled_map = wsp.Tiling(get_modded_tile_unit(), get_gdf()).get_tiled_map(join_on_prototiles=False)
     tiling_map = False # stop blocking other cells
     return tiled_map, tiling_map
 
 
-@app.cell(hide_code=True)
-def _(get_selected_colour_palettes, get_tile_ids, get_variables, tiled_map):
+@app.cell
+def render_tiled_map(
+    get_selected_colour_palettes,
+    get_tile_ids,
+    get_variables,
+    tiled_map,
+):
     tiled_map.ids_to_map = [id for id, v in zip(get_tile_ids(), get_variables()) if v != "---"]
     tiled_map.vars_to_map = [v for v in get_variables() if v != "---"]
     tiled_map.colors_to_use = [c for c, v in zip(get_selected_colour_palettes(), get_variables()) if v != "---"]
@@ -259,13 +156,9 @@ def _(get_selected_colour_palettes, get_tile_ids, get_variables, tiled_map):
     return (result,)
 
 
-@app.cell(hide_code=True)
-def set_number_of_variables(mo, tool_tip):
-    num_tiles = mo.ui.slider(# steps=range(2, 13), 
-                             steps=[x for x in range(2, 16)] + [18, 19], # if we figure out why >12 is a problem for the app...
-                             value=4, 
-                             debounce=True, 
-                             show_value=True)
+@app.cell
+def set_number_of_variables(mo):
+    num_tiles = mo.ui.slider(steps=[x for x in range(2, 16)] + [18, 19], value=4, debounce=True, show_value=True)
     mo.md(f"""
     ### General settings
     #### Set number of tiling elements {tool_tip(num_tiles, 'Choose the number of distinct tiles you want to use to symbolise data.')}
@@ -273,13 +166,13 @@ def set_number_of_variables(mo, tool_tip):
     return (num_tiles,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def variable_palette_map_header(mo):
     mo.md(f"""### Variables &lrarr; palettes""")
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def status_panel(
     get_gdf,
     get_numeric_variables,
@@ -303,7 +196,7 @@ def status_panel(
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def build_variable_and_palette_dropdowns(
     available_palettes,
     get_gdf,
@@ -339,35 +232,34 @@ def build_variable_and_palette_dropdowns(
         on_change=set_palettes)
     rev_pals = mo.ui.array(
         [mo.ui.switch(r) for r in _chosen_reversed], on_change=set_reversed)
-    return n_to_add, pals, rev_pals, to_add, variables
+    return pals, rev_pals, variables
 
 
-@app.cell(hide_code=True)
+@app.cell
 def build_var_palette_mapping(
     color_ramps,
     get_tile_ids,
     mo,
     pals,
     rev_pals,
-    tool_tip,
     variables,
 ):
     _cols = [pal.value + ("_r" if rev.value else "") for pal, rev in zip(pals, rev_pals)]
     mo.md("\n".join([
-        "&nbsp;&nbsp;".join([f"#### Tiles `{tile_id}`",
-                             f"{tool_tip(var, f"Variable for tiles with id {tile_id}")} &rarr;",
-                             f"{tool_tip(pal, f"Palette for variable {var.value}")}",
-                             f"<span style='position:relative;top:5px;'>{tool_tip(rev, 'Reverse ramp')}</span>", 
-                             f"<span style='display:inline-block;object-fit:cover;height:24px;position:relative;bottom:22px;'>{color_ramps[col]}</span>",
-    ]) for tile_id, var, pal, rev, col in zip(get_tile_ids(), variables, pals, rev_pals, _cols)]))
+        "&nbsp;&nbsp;".join(
+            [f"#### Tiles `{tile_id}`",
+             f"{tool_tip(var, f"Variable for tiles with id {tile_id}")} &rarr;",
+             f"{tool_tip(pal, f"Palette for variable {var.value}")}",
+             f"<span style='position:relative;top:5px;'>{tool_tip(rev, 'Reverse ramp')}</span>",
+             f"<span style='display:inline-block;object-fit:cover;height:24px;position:relative;bottom:22px;'>{color_ramps[col]}</span>"]) 
+        for tile_id, var, pal, rev, col in zip(get_tile_ids(), variables, pals, rev_pals, _cols)]))
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def set_spacing_limits(get_spacings, mo):
     _spacing_steps, _spacing_value = get_spacings()
-    spacing = mo.ui.slider(steps=_spacing_steps, value=_spacing_value,
-                           show_value=True, debounce=True)
+    spacing = mo.ui.slider(steps=_spacing_steps, value=_spacing_value, show_value=True, debounce=True)
     return (spacing,)
 
 
@@ -377,44 +269,15 @@ def _(mo, tile_or_weave):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def tiling_modifier_ui_elements(mo):
-    tile_rotate = mo.ui.slider(steps=range(-90, 91, 1), 
-                               value=0, 
-                               show_value=True, 
-                               debounce=True)
-    tile_scale_x = mo.ui.slider(start=0.5, 
-                                stop=4, 
-                                step=0.1, 
-                                value=1, 
-                                show_value=True, 
-                                debounce=True)
-    tile_scale_y = mo.ui.slider(start=0.5, 
-                                stop=4, 
-                                step=0.1, 
-                                value=1, 
-                                show_value=True, 
-                                debounce=True)
-    tile_skew_x = mo.ui.slider(steps=range(-40, 41, 1),
-                               value=0, 
-                               show_value=True, 
-                               debounce=True)
-    tile_skew_y = mo.ui.slider(steps=range(-40, 41, 1),
-                               value=0, 
-                               show_value=True, 
-                               debounce=True)
-    p_inset = mo.ui.slider(start=0, 
-                           stop=10, 
-                           step = 0.1, 
-                           value=0, 
-                           show_value=True, 
-                           debounce=True)
-    t_inset = mo.ui.slider(start=0, 
-                           stop=5, 
-                           step = 0.1, 
-                           value=0, 
-                           show_value=True, 
-                           debounce=True)
+    tile_rotate = mo.ui.slider(steps=range(-90, 91, 1), value=0, show_value=True, debounce=True)
+    tile_scale_x = mo.ui.slider(start=0.5, stop=4, step=0.1, value=1, show_value=True, debounce=True)
+    tile_scale_y = mo.ui.slider(start=0.5, stop=4, step=0.1, value=1, show_value=True, debounce=True)
+    tile_skew_x = mo.ui.slider(steps=range(-40, 41, 1), value=0, show_value=True, debounce=True)
+    tile_skew_y = mo.ui.slider(steps=range(-40, 41, 1), value=0, show_value=True, debounce=True)
+    p_inset = mo.ui.slider(start=0, stop=10, step=0.1, value=0, show_value=True, debounce=True)
+    t_inset = mo.ui.slider(start=0, stop=5, step = 0.1, value=0, show_value=True, debounce=True)
     return (
         p_inset,
         t_inset,
@@ -426,7 +289,7 @@ def tiling_modifier_ui_elements(mo):
     )
 
 
-@app.cell(hide_code=True)
+@app.cell
 def setup_tiling_modifiers(
     mo,
     p_inset,
@@ -439,13 +302,12 @@ def setup_tiling_modifiers(
     tile_skew_x,
     tile_skew_y,
     tiling_map,
-    tool_tip,
 ):
     mo.stop(tiling_map)
     if tile_or_weave.value == "tiling":
         _str = f"""
             #### Spacing {tool_tip(spacing, 'In units of the map CRS, the approximate dimension of the repeating group.')}
-            #### Rotate by {tool_tip(tile_rotate, 'Rotate tiling (degrees). Note that the tile group is rotated before any scaling or skew transforms are applied.')}
+            #### Rotate by {tool_tip(tile_rotate, 'Rotate tiling (degrees). The tile group is rotated before any scaling or skew transforms are applied.')}
             #### Scale left-right {tool_tip(tile_scale_x, 'Scale in the x direction.')}
             #### Scale up-down {tool_tip(tile_scale_y, 'Scale in the y direction.')}
             #### Skew left-right {tool_tip(tile_skew_x, 'Skew in the x direction (degrees).')}
@@ -456,7 +318,7 @@ def setup_tiling_modifiers(
     else:
         _str = f"""
             #### Spacing {tool_tip(spacing, 'In units of the map CRS, the distance between strand centre lines.')}
-            #### Rotate by {tool_tip(tile_rotate, "'Rotate weave (degrees). Note that the weave is rotated before any scaling or skew transforms are applied.'")}
+            #### Rotate by {tool_tip(tile_rotate, "'Rotate weave (degrees). The weave is rotated before any scaling or skew transforms are applied.'")}
             #### Scale left-right {tool_tip(tile_scale_x, "'Scale in the x direction.'")}
             #### Scale up-down {tool_tip(tile_scale_y, "'Scale in the y direction.'")}
             #### Skew left-right {tool_tip(tile_skew_x, "'Skew in the x direction (degrees).'")}
@@ -467,32 +329,23 @@ def setup_tiling_modifiers(
     return
 
 
-@app.cell(hide_code=True)
-def tiling_or_weave_chooser(mo, num_tiles, tilings_by_n, tool_tip):
+@app.cell
+def tiling_or_weave_chooser(mo, num_tiles, tilings_by_n):
     _options = list(set([v["type"] for v in tilings_by_n[num_tiles.value].values()]))
-    tile_or_weave = mo.ui.dropdown(options=_options, value="tiling", label="#### Pick tiling or weave")
-    mo.md(f"{tool_tip(tile_or_weave, 'Choose tiling or a weave tiling')}")
+    tile_or_weave = mo.ui.dropdown(options=_options, value="tiling")
+    mo.md(f"#### Pick tiling or weave {tool_tip(tile_or_weave, 'Choose tiling or a weave tiling')}")
     return (tile_or_weave,)
 
 
-@app.cell(hide_code=True)
-def tiling_type_chooser(mo, num_tiles, tile_or_weave, tilings_by_n, tool_tip):
+@app.cell
+def tiling_type_chooser(mo, num_tiles, tile_or_weave, tilings_by_n):
     _options = [k for k, v in tilings_by_n[num_tiles.value].items() if v["type"] == tile_or_weave.value]
-
-    family = mo.ui.dropdown(options=_options, 
-                            value=_options[0], 
-                            label=f"#### {tile_or_weave.value.capitalize()} type")
-    mo.md(f"{tool_tip(family, "Choose tiling family")}")
+    family = mo.ui.dropdown(options=_options, value=_options[0])
+    mo.md(f"#### {tile_or_weave.value.capitalize()} type {tool_tip(family, "Choose tiling family")}")
     return (family,)
 
 
-@app.cell(hide_code=True)
-def tiling_design_plot(get_modded_tile_unit, plot_tiles):
-    plot_tiles(get_modded_tile_unit())
-    return
-
-
-@app.cell(hide_code=True)
+@app.cell
 def setup_chosen_tiling_options(
     family,
     mo,
@@ -501,47 +354,19 @@ def setup_chosen_tiling_options(
     tilings_by_n,
 ):
     if "slice" in family.value:
-        _offset = mo.ui.slider(steps=[x / 100 for x in range(101)], 
-                               value=0,
-                               label="#### Offset",
-                               show_value=True, 
-                               debounce=True) 
+        _offset = mo.ui.slider(steps=[x / 100 for x in range(101)], value=0, label="#### Offset", show_value=True, debounce=True) 
     elif "dissect" in family.value:
-        _offset = mo.ui.number(start=0, 
-                               stop=1,
-                               value=0,
-                               label="#### Offset", 
-                               debounce=True)
+        _offset = mo.ui.number(start=0, stop=1, value=0, label="#### Offset", debounce=True)
         if "hex" in family.value:
-            _offset_angle = mo.ui.slider(steps=[x for x in range(-50, 86)],
-                                         value=0,
-                                         label="#### Inner angle",
-                                         show_value=True,
-                                         debounce=True)
+            _offset_angle = mo.ui.slider(steps=[x for x in range(-50, 86)], value=0, label="#### Inner angle", show_value=True, debounce=True)
         else:
-            _offset_angle = mo.ui.slider(steps=[x for x in range(-30, 71)],
-                                         value=0,
-                                         label="#### Inner angle",
-                                         show_value=True,
-                                         debounce=True)
+            _offset_angle = mo.ui.slider(steps=[x for x in range(-30, 71)], value=0, label="#### Inner angle", show_value=True, debounce=True)
     elif "star1" in family.value:
-        _point_angle = mo.ui.slider(steps=[x for x in range(10, 121)],
-                                    value=30,
-                                    label="#### Point angle",
-                                    show_value=True,
-                                    debounce=True)
+        _point_angle = mo.ui.slider(steps=[x for x in range(10, 121)], value=30, label="#### Point angle", show_value=True, debounce=True)
     elif "weave" in family.value:
-        _aspect = mo.ui.slider(steps=[0.083, 0.167, 0.25,
-                                      0.333, 0.417, 0.5,
-                                      0.583, 0.667, 0.75,
-                                      0.833, 0.917, 1], 
-                               value=0.75, 
-                               label="#### Strand width",
-                               show_value=True, 
-                               debounce=True)
+        _aspect = mo.ui.slider(steps=[round(_/12, 3) for _ in range(1, 13)], value=0.75, label="#### Strand width", show_value=True, debounce=True)
         if not "cube" in family.value:
-            _over_under = mo.ui.text(value=tilings_by_n[num_tiles.value][family.value]["n"],
-                                     label="#### Over-under pattern")
+            _over_under = mo.ui.text(value=tilings_by_n[num_tiles.value][family.value]["n"], label="#### Over-under pattern")
 
     if tile_or_weave.value == "tiling":
         if "slice" in family.value:
@@ -563,18 +388,16 @@ def setup_chosen_tiling_options(
             tile_spec = mo.ui.dictionary({"aspect": _aspect, "over_under": _over_under,})
             tooltips = [
                 "The width of the weave strands relative to strand spacing.", 
-                "Comma-separated sequence of how many strands in the other direction each ribbon should go over, then under. Use values that are factors of the numbers of strands in each direction to avoid very large and complex repeating units."
-            ]
+                "Comma-separated sequence of how many strands in the other direction each ribbon should go over, then under. Use values that are factors of the numbers of strands in each direction to avoid very large and complex repeating units."]
     return tile_spec, tooltips
 
 
-@app.cell(hide_code=True)
+@app.cell
 def additional_tiling_options(
     mo,
     tile_or_weave,
     tile_spec,
     tiling_map,
-    tool_tip,
     tooltips,
 ):
     mo.stop(tiling_map)
@@ -589,16 +412,20 @@ def additional_tiling_options(
     return
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    _radius = mo.ui.slider(steps=range(5), 
-                           value=0, 
-                           show_value=True)
-    _show_prototile = mo.ui.switch(value=False)
+@app.cell
+def tiling_design_plot(get_modded_tile_unit, plot_tiles):
+    plot_tiles(get_modded_tile_unit())
+    return
+
+
+@app.cell
+def design_view_settings(mo):
+    _radius             = mo.ui.slider(steps=range(5), value=0, show_value=True)
+    _show_prototile     = mo.ui.switch(value=False)
     _show_reg_prototile = mo.ui.switch(value=False)
-    _show_vectors = mo.ui.switch(value=False)
-    _show_ids = mo.ui.switch(value=True)
-    _show_scale = mo.ui.switch(value=False)
+    _show_vectors       = mo.ui.switch(value=False)
+    _show_ids           = mo.ui.switch(value=True)
+    _show_scale         = mo.ui.switch(value=False)
 
     view_settings = mo.ui.dictionary({
         "radius": _radius,
@@ -611,16 +438,11 @@ def _(mo):
     return (view_settings,)
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(f"""### Design view options""")
-    return
-
-
-@app.cell(hide_code=True)
-def design_view_ui_elements(mo, tool_tip, view_settings):
+@app.cell
+def design_view_ui_elements(mo, view_settings):
     mo.md(
         f"""
+    ### Design view options
     #### {tool_tip(view_settings['show_ids'], 'Show the tiling element labels used to match tiles to variables in the map data.')} Show tile IDs
     #### {tool_tip(view_settings['show_prototile'], 'Show in fine black outline the simple tile (usually a square or hexagon) which forms the basis of the pattern.')} Show base tile
     #### {tool_tip(view_settings['show_vectors'], 'Show the translations that map repeating tiles in the pattern onto one another.')} Show vectors
@@ -632,11 +454,10 @@ def design_view_ui_elements(mo, tool_tip, view_settings):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(
     family,
     get_gdf,
-    get_over_under,
     num_tiles,
     spacing,
     tile_or_weave,
@@ -669,14 +490,11 @@ def _(
                     if spec["weave_type"] in ["twill", "basket"] else 1,
                 aspect=tile_spec["aspect"].value,
                 crs=get_gdf().crs)
-        # remove tiles for which no variables are available
-        # slice = [id in get_tile_ids() for id in result.tiles.tile_id]
-        # result.tiles = result.tiles.loc[slice]
         return result
     return (get_base_tile_unit,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(
     get_base_tile_unit,
     p_inset,
@@ -712,27 +530,25 @@ def _(
     return (get_modded_tile_unit,)
 
 
-@app.cell(hide_code=True)
-def _(Union):
-    def get_over_under(pattern:str) -> Union[int,tuple[int]]:
-        """
-        Returns either an integer or tuple of integers of even length 
-        based on the supplied comma-separated string of integer values
-        """
-        # convert string over under pattern to tuple[int]
-        # if any invalid characters in string return a useful default
-        if any([not c in "0123456789," for c in pattern]): return (2, 2)
-        numbers = [int(s) for s in pattern.split(",")]
-        # has to be an even number of elements so trim if needed
-        length = 2 * len(numbers) // 2
-        if length == 0:
-            return (2, 2)
-        else:
-            return tuple(numbers[:length])
-    return (get_over_under,)
+@app.function
+def get_over_under(pattern:str) -> int|tuple[int]:
+    """
+    Returns either an integer or tuple of integers of even length 
+    based on the supplied comma-separated string of integer values
+    """
+    # convert string over under pattern to tuple[int]
+    # if any invalid characters in string return a useful default
+    if any([not c in "0123456789," for c in pattern]): return (2, 2)
+    numbers = [int(s) for s in pattern.split(",")]
+    # has to be an even number of elements so trim if needed
+    length = 2 * len(numbers) // 2
+    if length == 0:
+        return (2, 2)
+    else:
+        return tuple(numbers[:length])
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(get_selected_colour_palettes, mpl, num_tiles, view_settings, wsp):
     def plot_tiles(tiles:wsp.Tileable) -> mpl.axis:
         """
@@ -765,7 +581,7 @@ def _(get_selected_colour_palettes, mpl, num_tiles, view_settings, wsp):
     return (plot_tiles,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(get_gdf, get_numeric_variables):
     def get_tile_ids() -> list[str]:
         """
@@ -776,7 +592,7 @@ def _(get_gdf, get_numeric_variables):
     return (get_tile_ids,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(num_tiles, pals, rev_pals):
     def get_selected_colour_palettes() -> list[str]:
         """
@@ -784,12 +600,11 @@ def _(num_tiles, pals, rev_pals):
         _r suffix where the reverse switch has been set
         """
         return [(p if not r else p + "_r") 
-                for p, r in zip(pals.value[:num_tiles.value], 
-                                rev_pals.value[:num_tiles.value])]
+                for p, r in zip(pals.value[:num_tiles.value], rev_pals.value[:num_tiles.value])]
     return (get_selected_colour_palettes,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(io, mo, mpl):
     def get_colour_ramp(pal_name:str="Reds", rev:bool=False) -> mo.image:
         """
@@ -813,7 +628,7 @@ def _(io, mo, mpl):
     return (get_colour_ramp,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(gpd, pd):
     def get_numeric_variables(_gdf:gpd.GeoDataFrame) -> list[str]:
         """
@@ -825,7 +640,7 @@ def _(gpd, pd):
     return (get_numeric_variables,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(get_gdf, math):
     def get_spacings() -> list[int]:
         """
@@ -841,33 +656,134 @@ def _(get_gdf, math):
         _stepsize2 = _min // 2
         _steps = [x for x in range(_min, _mid, _stepsize1)] + \
                  [x for x in range(_mid, _max + 1, _stepsize2)]
-        # if tile_or_weave.value == "weave":
-        #     _steps = [x // 2 for x in _steps]
-        #     _mid = _mid // 2
         return _steps, 3 * _mid // 4
     return (get_spacings,)
 
 
-@app.cell(hide_code=True)
-def tool_tip():
-    def tool_tip(ele:str, tip:str) -> str:
-        """
-        Returns a HTML <span> string putting a tooltip around the supplied element 
-        """
-        # convenience function to add a tooltip to supplied string
-        return f'<span title="{tip}">{ele}</span>'
-    return (tool_tip,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        f"""
-    ### Available tilings
-    Organised by number of variables to symbolise
+@app.function
+def tool_tip(ele:str, tip:str) -> str:
     """
+    Returns a HTML <span> string putting a tooltip around the supplied element 
+    """
+    # convenience function to add a tooltip to supplied string
+    return f'<span title="{tip}">{ele}</span>'
+
+
+@app.cell
+def constants(CMAPS_DIVERGING, CMAPS_SEQUENTIAL, get_colour_ramp, gpd):
+    ok_message = "STATUS All good!"
+    dummy_data_file = "https://raw.githubusercontent.com/DOSull/weaving-space/refs/heads/main/examples/data/dummy-data.json"
+    builtin_gdf = gpd.read_file(dummy_data_file, engine="fiona")
+    available_palettes = [pal for pal in CMAPS_SEQUENTIAL + CMAPS_DIVERGING if pal[-2:] != "_r" and 
+                         pal not in ["berlin", "managua", "vanimo"]] # these don't seem to be in MPL3.8.4
+    # make a bunch of colour ramps and save them in a dictionary so we only
+    # have to make them at notebook initialisation
+    color_ramps = {k: get_colour_ramp(k) for k in available_palettes + [p + "_r" for p in available_palettes]}
+    return (
+        available_palettes,
+        builtin_gdf,
+        color_ramps,
+        dummy_data_file,
+        ok_message,
     )
-    return
+
+
+@app.cell
+def _(dummy_data_file, mo):
+    # the input data source
+    get_input_data, set_input_data = mo.state(dummy_data_file)
+    return get_input_data, set_input_data
+
+
+@app.cell
+def _(builtin_gdf, mo):
+    # the GeoDataframe we are tiling - using state means we can restore
+    # current GDF if a new one has issues 
+    get_gdf, set_gdf = mo.state(builtin_gdf)
+    return get_gdf, set_gdf
+
+
+@app.cell
+def _(mo):
+    # variables currently selected by the user
+    get_variables, set_variables = mo.state([])
+    return get_variables, set_variables
+
+
+@app.cell
+def _(available_palettes, mo):
+    # palettes currently selected by the user
+    get_palettes, set_palettes = mo.state(available_palettes)
+    # palette reverse settings
+    return get_palettes, set_palettes
+
+
+@app.cell
+def _(mo):
+    get_reversed, set_reversed = mo.state([])
+    # app status message
+    return get_reversed, set_reversed
+
+
+@app.cell
+def _(mo, ok_message):
+    get_status_message, set_status_message = mo.state(ok_message)
+    return get_status_message, set_status_message
+
+
+@app.cell
+def module_imports():
+    import io                     # for in-memory loading of inputs and outputs
+    return (io,)
+
+
+@app.cell
+def _():
+    from pathlib import Path
+    return (Path,)
+
+
+@app.cell
+def _():
+    import matplotlib as mpl
+    return (mpl,)
+
+
+@app.cell
+def _():
+    import math
+    return (math,)
+
+
+@app.cell
+def _():
+    import pandas as pd
+    return (pd,)
+
+
+@app.cell
+def _():
+    import geopandas as gpd
+    return (gpd,)
+
+
+@app.cell
+def _():
+    from shapely import is_valid
+    return (is_valid,)
+
+
+@app.cell
+def _():
+    import weavingspace as wsp
+    return (wsp,)
+
+
+@app.cell
+def _():
+    from weavingspace import CMAPS_SEQUENTIAL
+    from weavingspace import CMAPS_DIVERGING
+    return CMAPS_DIVERGING, CMAPS_SEQUENTIAL
 
 
 @app.cell(hide_code=True)
@@ -1061,7 +977,17 @@ def setup_tilings_dictionary():
     return (tilings_by_n,)
 
 
-@app.cell(hide_code=True)
+@app.cell
+def _(centred, mo):
+    mo.vstack([
+        mo.image(src="mw.png").style(centred),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.04.22</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.73</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
+    ])
+    return
+
+
+@app.cell
 def _():
     centred = {
         "display": "flex",
@@ -1073,7 +999,7 @@ def _():
     return (centred,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _():
     import marimo as mo
     return (mo,)
