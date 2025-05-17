@@ -212,26 +212,32 @@ def build_variable_and_palette_dropdowns(
     tiling_map,
 ):
     mo.stop(tiling_map)
-    if num_tiles.value < len(get_variables()):
-        set_variables(get_variables()[:num_tiles.value])
-        set_reversed(get_reversed()[:num_tiles.value])
-    elif num_tiles.value >= len(get_variables()):
+    _n = num_tiles.value
+    _vars = get_variables()
+    _pals = get_palettes()
+    _revs = get_reversed()
+    if _n < len(_vars):
+        set_variables(_vars[:_n])
+        set_palettes(_pals[:_n])
+        set_reversed(_revs[:_n])
+    elif _n >= len(_vars):
+        _numeric_vars = get_numeric_variables(get_gdf())
         # add as many additional variables as we have to work with
-        n_to_add = min(num_tiles.value, len(get_numeric_variables(get_gdf()))) - len(get_variables())
-        to_add = [v for v in get_numeric_variables(get_gdf()) if v not in get_variables()][:n_to_add]
-        set_variables(get_variables() + to_add)
-        set_reversed(get_reversed() + [False] * len(to_add))
+        _n_to_add = min(_n, len(_numeric_vars)) - len(_vars)
+        _to_add = [v for v in _numeric_vars if v not in _vars][:_n_to_add]
+        set_variables(_vars + _to_add)
+        set_palettes(_pals + [p for p in available_palettes if not p in _pals][:_n_to_add])
+        set_reversed(_revs + [False] * _n_to_add)
 
-    _chosen_palettes = get_palettes()[:num_tiles.value]
-    _chosen_reversed = get_reversed()[:num_tiles.value]
     variables = mo.ui.array(
-        [mo.ui.dropdown(options=get_numeric_variables(get_gdf()) + ["---"], value=v) for v in get_variables()], 
-        on_change=set_variables) 
+        [mo.ui.dropdown(options=get_numeric_variables(get_gdf()) + ["---"], value=v) 
+         for v in get_variables()], on_change=set_variables) 
     pals = mo.ui.array(
-        [mo.ui.dropdown(options=available_palettes, value=p) for p in _chosen_palettes], 
-        on_change=set_palettes)
+        [mo.ui.dropdown(options=available_palettes, value=p) 
+         for p in get_palettes()], on_change=set_palettes)
     rev_pals = mo.ui.array(
-        [mo.ui.switch(r) for r in _chosen_reversed], on_change=set_reversed)
+        [mo.ui.switch(r)
+         for r in get_reversed()], on_change=set_reversed)
     return pals, rev_pals, variables
 
 
@@ -981,8 +987,8 @@ def setup_tilings_dictionary():
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.04.22</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
-        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.73</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.05.18</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.79</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
 
