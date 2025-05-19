@@ -27,6 +27,7 @@ def read_gdf(
     io,
     is_valid,
     ok_message,
+    set_crs,
     set_gdf,
     set_status_message,
     set_variables,
@@ -39,6 +40,7 @@ def read_gdf(
     # otherwise it's the upload button result unless that is length 0
     if isinstance(get_input_data(), str) or len(get_input_data()) == 0:
         set_gdf(builtin_gdf)
+        set_crs(builtin_gdf.crs)
     else:
         # store current GDF in case we need to restore it
         _old_gdf = get_gdf()
@@ -51,6 +53,7 @@ def read_gdf(
             # the exact type, but we'll keep an eye on that and update
             # meanwhile... reset to the current GDF and flag error
             set_gdf(_old_gdf)
+            set_crs(_old_gdf.crs)
             set_status_message("ERROR! Exception in uploading data")
             print(e.args)
             raise e
@@ -60,6 +63,7 @@ def read_gdf(
             if _n < 2:
                 set_status_message("WARNING! One or fewer variables, data not loaded")
                 set_gdf(_old_gdf)
+                set_crs(_old_gdf.crs)
                 _done = True # we're done
             if not _done:
                 # check no topology issues and attempt repair
@@ -76,6 +80,7 @@ def read_gdf(
                 # check data are projected and reproject if not
                 if not _new_gdf.crs.is_projected:
                     _new_gdf = _new_gdf.to_crs(3857)
+                    set_crs(3857)
                 set_variables(get_numeric_variables(_new_gdf))
                 if _did_repairs:
                     set_status_message("WARNING! Repaired geometry errors in your data")
@@ -463,7 +468,7 @@ def design_view_ui_elements(mo, view_settings):
 @app.cell
 def _(
     family,
-    get_gdf,
+    get_crs,
     num_tiles,
     spacing,
     tile_or_weave,
@@ -486,7 +491,7 @@ def _(
                 offset=tile_spec["offset"].value if "offset" in spec else None,
                 offset_angle=tile_spec["offset_angle"].value if "offset_angle" in spec else None,
                 point_angle=tile_spec["point_angle"].value if "point_angle" in spec else None,
-                crs=get_gdf().crs)
+                crs=get_crs())
         else:
             result = wsp.WeaveUnit(
                 weave_type=spec["weave_type"],
@@ -495,7 +500,7 @@ def _(
                 n=get_over_under(tile_spec["over_under"].value) \
                     if spec["weave_type"] in ["twill", "basket"] else 1,
                 aspect=tile_spec["aspect"].value,
-                crs=get_gdf().crs)
+                crs=get_crs())
         return result
     return (get_base_tile_unit,)
 
@@ -735,6 +740,12 @@ def _(mo):
 def _(mo, ok_message):
     get_status_message, set_status_message = mo.state(ok_message)
     return get_status_message, set_status_message
+
+
+@app.cell
+def _(mo):
+    get_crs, set_crs = mo.state(3857)
+    return get_crs, set_crs
 
 
 @app.cell
@@ -987,7 +998,7 @@ def setup_tilings_dictionary():
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.05.18</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.05.20</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
         mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.79</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
