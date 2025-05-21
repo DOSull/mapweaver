@@ -345,7 +345,7 @@ def setup_tiling_modifiers(
 @app.cell
 def _(mo, scaling_switch, tile_or_weave):
     if tile_or_weave.value == "tiling":
-        _str = f"#### Scale independent of pattern {tool_tip(scaling_switch, 'Apply scale independent of the repeat pattern.')}"
+        _str = f"#### {tool_tip(scaling_switch, 'Apply scale independent of the repeat pattern.')} Scale independent of pattern"
     else:
         _str = ""
     mo.md(_str)
