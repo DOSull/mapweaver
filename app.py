@@ -283,14 +283,16 @@ def _(mo, tile_or_weave):
 @app.cell
 def tiling_modifier_ui_elements(mo):
     tile_rotate = mo.ui.slider(steps=range(-90, 91, 1), value=0, show_value=True, debounce=True)
-    tile_scale_x = mo.ui.slider(start=0.5, stop=4, step=0.1, value=1, show_value=True, debounce=True)
-    tile_scale_y = mo.ui.slider(start=0.5, stop=4, step=0.1, value=1, show_value=True, debounce=True)
+    tile_scale_x = mo.ui.slider(steps = [_/50 for _ in range(25, 50)] + [_/10 for _ in range(10, 41)], value=1, show_value=True, debounce=True)
+    tile_scale_y = mo.ui.slider(steps = [_/50 for _ in range(25, 50)] + [_/10 for _ in range(10, 41)], value=1, show_value=True, debounce=True)
     tile_skew_x = mo.ui.slider(steps=range(-40, 41, 1), value=0, show_value=True, debounce=True)
     tile_skew_y = mo.ui.slider(steps=range(-40, 41, 1), value=0, show_value=True, debounce=True)
     p_inset = mo.ui.slider(start=0, stop=10, step=0.1, value=0, show_value=True, debounce=True)
     t_inset = mo.ui.slider(start=0, stop=5, step = 0.1, value=0, show_value=True, debounce=True)
+    scaling_switch = mo.ui.switch(value=False)
     return (
         p_inset,
+        scaling_switch,
         t_inset,
         tile_rotate,
         tile_scale_x,
@@ -336,6 +338,16 @@ def setup_tiling_modifiers(
             #### Skew up-down {tool_tip(tile_skew_y, "'Skew in the y direction (degrees).'")}
             #### Strands inset {tool_tip(t_inset, "'Inset strands (% width).'")}
             """
+    mo.md(_str)
+    return
+
+
+@app.cell
+def _(mo, scaling_switch, tile_or_weave):
+    if tile_or_weave.value == "tiling":
+        _str = f"#### Scale independent of pattern {tool_tip(scaling_switch, 'Apply scale independent of the repeat pattern.')}"
+    else:
+        _str = ""
     mo.md(_str)
     return
 
@@ -509,6 +521,7 @@ def _(
 def _(
     get_base_tile_unit,
     p_inset,
+    scaling_switch,
     spacing,
     t_inset,
     tile_or_weave,
@@ -528,7 +541,7 @@ def _(
         if tile_or_weave.value == "tiling":
             return get_base_tile_unit() \
                .transform_rotate(tile_rotate.value) \
-               .transform_scale(tile_scale_x.value, tile_scale_y.value) \
+               .transform_scale(tile_scale_x.value, tile_scale_y.value, scaling_switch.value) \
                .transform_skew(tile_skew_x.value, tile_skew_y.value) \
                .inset_tiles(t_inset.value * spacing.value / 100) \
                .inset_prototile(p_inset.value * spacing.value / 100)
@@ -998,7 +1011,7 @@ def setup_tilings_dictionary():
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.05.20</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.05.21</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
         mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.79</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
