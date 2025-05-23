@@ -163,7 +163,7 @@ def render_tiled_map(
 
 @app.cell
 def set_number_of_variables(mo):
-    num_tiles = mo.ui.slider(steps=[x for x in range(2, 16)] + [18, 19], value=4, debounce=True, show_value=True)
+    num_tiles = mo.ui.slider(steps=[x for x in range(2, 16)] + [18,19,20], value=4, debounce=True, show_value=True)
     mo.md(f"""
     ### General settings
     #### Set number of tiling elements {tool_tip(num_tiles, 'Choose the number of distinct tiles you want to use to symbolise data.')}
@@ -849,7 +849,6 @@ def setup_tilings_dictionary():
         "hex-slice 3": dict(type="tiling", tiling_type="hex-slice", n=3, offset=0),
         "hex-colouring 3": dict(type="tiling", tiling_type="hex-col", n=3),
         "crosses 3": dict(type="tiling", tiling_type="cross", n=3),
-        "star1 33": dict(type="tiling", tiling_type="star1", code="33", point_angle=30),
         "square-colouring 3": dict(type="tiling", tiling_type="square-col", n=3),
         "archimedean 3.6.3.6": dict(type="tiling", tiling_type="archi", code="3.6.3.6"),
         "archimedean 3.12.12": dict(type="tiling", tiling_type="archi", code="3.12.12"),
@@ -857,6 +856,7 @@ def setup_tilings_dictionary():
         "archimedean 3.3.3.4.4": dict(type="tiling", tiling_type="archi", code="3.3.3.4.4"),
         "hex-dissection 3": dict(type="tiling", tiling_type="hex-dissect", n=3, offset=0, offset_angle=0),
         "square-dissection 3": dict(type="tiling", tiling_type="square-dissect", n=3, offset=0, offset_angle=0),
+        "star1 33": dict(type="tiling", tiling_type="star1", code="33", point_angle=30),
         "star2 66": dict(type="tiling", tiling_type="star2", code="66"),
         "star1 36": dict(type="tiling", tiling_type="star1", code="36", point_angle=30),
         "star1 63": dict(type="tiling", tiling_type="star1", code="63", point_angle=30),
@@ -925,6 +925,7 @@ def setup_tilings_dictionary():
         "crosses 6": dict(type="tiling", tiling_type="cross", n=6),
         "star2 45": dict(type="tiling", tiling_type="star2", code="45"),
         "star2 663": dict(type="tiling", tiling_type="star2", code="663"),
+        "star2 466": dict(type="tiling", tiling_type="star2", code="466"),
         "hex-colouring 6": dict(type="tiling", tiling_type="hex-col", n=6),
       },
       7: {
@@ -983,7 +984,7 @@ def setup_tilings_dictionary():
         "hex-slice 11": dict(type="tiling", tiling_type="hex-slice", n=11, offset=0),
         "square-slice 11": dict(type="tiling", tiling_type="square-slice", n=11, offset=0),
         "chavey E": dict(type="tiling", tiling_type="chavey", code="E"),
-        "chavey G": dict(type="tiling", tiling_type="chavey", code="G"),
+        "chavey F": dict(type="tiling", tiling_type="chavey", code="F"),
         "plain weave abcdef|ghijk": dict(type="weave", weave_type="plain", strands="abcdef|ghijk", n="1"),
         "plain weave abcdef|ghijk-": dict(type="weave", weave_type="plain", strands="abcdef|ghijk-", n="1"),
         "plain weave abcdef-|ghijk-": dict(type="weave", weave_type="plain", strands="abcdef-|ghijk-", n="1"),
@@ -997,12 +998,19 @@ def setup_tilings_dictionary():
       },
       13: {"chavey A": dict(type="tiling", tiling_type="chavey", code="A"),},
       14: {"chavey B": dict(type="tiling", tiling_type="chavey", code="B"),},
-      15: {"chavey F": dict(type="tiling", tiling_type="chavey", code="F"),},
+      15: {
+        "chavey H": dict(type="tiling", tiling_type="chavey", code="H"),
+        "chavey J": dict(type="tiling", tiling_type="chavey", code="J"),
+      },
       18: {
         "chavey C": dict(type="tiling", tiling_type="chavey", code="C"),
         "chavey D": dict(type="tiling", tiling_type="chavey", code="D"),
       },
-      19: {"chavey H": dict(type="tiling", tiling_type="chavey", code="H"),},
+      19: {"chavey G": dict(type="tiling", tiling_type="chavey", code="G"),},
+      20: {
+        "chavey I": dict(type="tiling", tiling_type="chavey", code="I"),
+        "chavey K": dict(type="tiling", tiling_type="chavey", code="K"),
+      },
     }
     return (tilings_by_n,)
 
@@ -1011,8 +1019,8 @@ def setup_tilings_dictionary():
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.05.21</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
-        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.79</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.05.24</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.83</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
 
