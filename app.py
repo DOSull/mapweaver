@@ -163,7 +163,7 @@ def render_tiled_map(
 
 @app.cell
 def set_number_of_variables(mo):
-    num_tiles = mo.ui.slider(steps=[x for x in range(2, 16)] + [18,19,20], value=4, debounce=True, show_value=True)
+    num_tiles = mo.ui.slider(steps=[x for x in range(2, 21) if x != 17], value=4, debounce=True, show_value=True)
     mo.md(f"""
     ### General settings
     #### Set number of tiling elements {tool_tip(num_tiles, 'Choose the number of distinct tiles you want to use to symbolise data.')}
@@ -1002,6 +1002,10 @@ def setup_tilings_dictionary():
         "chavey H": dict(type="tiling", tiling_type="chavey", code="H"),
         "chavey J": dict(type="tiling", tiling_type="chavey", code="J"),
       },
+      16: {
+        "square-colouring 16": dict(type="tiling", tiling_type="square-col", n=16),
+        "hex-colouring 16": dict(type="tiling", tiling_type="hex-col", n=16),
+      },
       18: {
         "chavey C": dict(type="tiling", tiling_type="chavey", code="C"),
         "chavey D": dict(type="tiling", tiling_type="chavey", code="D"),
@@ -1020,7 +1024,7 @@ def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
         mo.md(f"<span title='Weaving maps of complex data'>2025.05.24</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
-        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.83</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
+        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.89</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
 
