@@ -140,15 +140,17 @@ def download_result(
 
 @app.cell
 def get_tiled_map(
+    clip_by_areas,
     get_gdf,
     get_modded_tile_unit,
     join_on_prototile,
-    ragged_edges,
+    keep_tileables,
     wsp,
 ):
     tiling_map = True # flag to block some other cells (potentially...)
     tiled_map = wsp.Tiling(get_modded_tile_unit(), get_gdf()).get_tiled_map(
-        ragged_edges=ragged_edges.value,
+        retain_tileables=keep_tileables.value,
+        ragged_edges=not(clip_by_areas.value),
         join_on_prototiles=join_on_prototile.value)
     tiling_map = False # stop blocking other cells
     return tiled_map, tiling_map
@@ -299,11 +301,13 @@ def tiling_modifier_ui_elements(mo):
     t_inset = mo.ui.slider(start=0, stop=5, step = 0.1, value=0, show_value=True, debounce=True)
     scaling_switch = mo.ui.switch(value=False)
     join_on_prototile = mo.ui.switch(value=False)
-    ragged_edges = mo.ui.switch(value=True)
+    clip_by_areas = mo.ui.switch(value=False)
+    keep_tileables = mo.ui.switch(value=False)
     return (
+        clip_by_areas,
         join_on_prototile,
+        keep_tileables,
         p_inset,
-        ragged_edges,
         scaling_switch,
         t_inset,
         tile_rotate,
@@ -355,17 +359,26 @@ def setup_tiling_modifiers(
 
 
 @app.cell
-def _(join_on_prototile, mo, ragged_edges, scaling_switch, tile_or_weave):
+def _(
+    clip_by_areas,
+    join_on_prototile,
+    keep_tileables,
+    mo,
+    scaling_switch,
+    tile_or_weave,
+):
     if tile_or_weave.value == "tiling":
         _str = f"""
         #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
-        #### {tool_tip(ragged_edges, "Show tiles at map edges, not map areas.")} Clip by tiles not map units
+        #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
+        #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
         #### {tool_tip(scaling_switch, 'Apply scale independent of the repeat pattern.')} Scale as glyph
         """
     else:
         _str = f"""
         #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
-        #### {tool_tip(ragged_edges, "Show tiles at map edges, not map areas.")} Clip by tiles not map units
+        #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
+        #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
         """
     mo.md(_str)
     return
@@ -1043,7 +1056,7 @@ def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
         mo.md(f"<span title='Weaving maps of complex data'>2025.05.24</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
-        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.89</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
+        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.97</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
 
