@@ -139,9 +139,17 @@ def download_result(
 
 
 @app.cell
-def get_tiled_map(get_gdf, get_modded_tile_unit, wsp):
+def get_tiled_map(
+    get_gdf,
+    get_modded_tile_unit,
+    join_on_prototile,
+    ragged_edges,
+    wsp,
+):
     tiling_map = True # flag to block some other cells (potentially...)
-    tiled_map = wsp.Tiling(get_modded_tile_unit(), get_gdf()).get_tiled_map(join_on_prototiles=False)
+    tiled_map = wsp.Tiling(get_modded_tile_unit(), get_gdf()).get_tiled_map(
+        ragged_edges=ragged_edges.value,
+        join_on_prototiles=join_on_prototile.value)
     tiling_map = False # stop blocking other cells
     return tiled_map, tiling_map
 
@@ -290,8 +298,12 @@ def tiling_modifier_ui_elements(mo):
     p_inset = mo.ui.slider(start=0, stop=10, step=0.1, value=0, show_value=True, debounce=True)
     t_inset = mo.ui.slider(start=0, stop=5, step = 0.1, value=0, show_value=True, debounce=True)
     scaling_switch = mo.ui.switch(value=False)
+    join_on_prototile = mo.ui.switch(value=False)
+    ragged_edges = mo.ui.switch(value=True)
     return (
+        join_on_prototile,
         p_inset,
+        ragged_edges,
         scaling_switch,
         t_inset,
         tile_rotate,
@@ -321,21 +333,21 @@ def setup_tiling_modifiers(
         _str = f"""
             #### Spacing {tool_tip(spacing, 'In units of the map CRS, the approximate dimension of the repeating group.')}
             #### Rotate by {tool_tip(tile_rotate, 'Rotate tiling (degrees). The tile group is rotated before any scaling or skew transforms are applied.')}
-            #### Scale left-right {tool_tip(tile_scale_x, 'Scale in the x direction.')}
-            #### Scale up-down {tool_tip(tile_scale_y, 'Scale in the y direction.')}
-            #### Skew left-right {tool_tip(tile_skew_x, 'Skew in the x direction (degrees).')}
-            #### Skew up-down {tool_tip(tile_skew_y, 'Skew in the y direction (degrees).')}
-            #### Tile group inset {tool_tip(p_inset, 'Inset the tile group (% spacing).')}
+            #### Scale EW {tool_tip(tile_scale_x, 'Scale in the x direction.')}
+            #### Scale NS {tool_tip(tile_scale_y, 'Scale in the y direction.')}
+            #### Skew EW {tool_tip(tile_skew_x, 'Skew in the x direction (degrees).')}
+            #### Skew NS {tool_tip(tile_skew_y, 'Skew in the y direction (degrees).')}
+            #### Group inset {tool_tip(p_inset, 'Inset the tile group (% spacing).')}
             #### Tiles inset {tool_tip(t_inset, 'Inset individual tiles (% spacing).')}
             """
     else:
         _str = f"""
             #### Spacing {tool_tip(spacing, 'In units of the map CRS, the distance between strand centre lines.')}
             #### Rotate by {tool_tip(tile_rotate, "'Rotate weave (degrees). The weave is rotated before any scaling or skew transforms are applied.'")}
-            #### Scale left-right {tool_tip(tile_scale_x, "'Scale in the x direction.'")}
-            #### Scale up-down {tool_tip(tile_scale_y, "'Scale in the y direction.'")}
-            #### Skew left-right {tool_tip(tile_skew_x, "'Skew in the x direction (degrees).'")}
-            #### Skew up-down {tool_tip(tile_skew_y, "'Skew in the y direction (degrees).'")}
+            #### Scale EW {tool_tip(tile_scale_x, "'Scale in the x direction.'")}
+            #### Scale NS {tool_tip(tile_scale_y, "'Scale in the y direction.'")}
+            #### Skew EW {tool_tip(tile_skew_x, "'Skew in the x direction (degrees).'")}
+            #### Skew NS {tool_tip(tile_skew_y, "'Skew in the y direction (degrees).'")}
             #### Strands inset {tool_tip(t_inset, "'Inset strands (% width).'")}
             """
     mo.md(_str)
@@ -343,11 +355,18 @@ def setup_tiling_modifiers(
 
 
 @app.cell
-def _(mo, scaling_switch, tile_or_weave):
+def _(join_on_prototile, mo, ragged_edges, scaling_switch, tile_or_weave):
     if tile_or_weave.value == "tiling":
-        _str = f"#### {tool_tip(scaling_switch, 'Apply scale independent of the repeat pattern.')} Scale independent of pattern"
+        _str = f"""
+        #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
+        #### {tool_tip(ragged_edges, "Show tiles at map edges, not map areas.")} Clip by tiles not map units
+        #### {tool_tip(scaling_switch, 'Apply scale independent of the repeat pattern.')} Scale as glyph
+        """
     else:
-        _str = ""
+        _str = f"""
+        #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
+        #### {tool_tip(ragged_edges, "Show tiles at map edges, not map areas.")} Clip by tiles not map units
+        """
     mo.md(_str)
     return
 
