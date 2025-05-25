@@ -170,7 +170,8 @@ def render_tiled_map(
     tiled_map.colors_to_use = [c for c, v in zip(get_selected_colour_palettes(), get_variables()) if v != "---"]
     result = tiled_map.render(legend=False)
     if show_map.value:
-        get_gdf().plot(ax=result.axes[0], fc="#00000000", edgecolor="k")
+        get_gdf().plot(ax=result.axes[0], fc="#00000000", edgecolor="w", linewidth=2.5)
+        get_gdf().plot(ax=result.axes[0], fc="#00000000", edgecolor="k", linewidth=1.5)
     result
     return (result,)
 
