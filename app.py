@@ -162,18 +162,16 @@ def render_tiled_map(
     get_selected_colour_palettes,
     get_tile_ids,
     get_variables,
-    mo,
     show_map,
     tiled_map,
 ):
     tiled_map.ids_to_map = [id for id, v in zip(get_tile_ids(), get_variables()) if v != "---"]
     tiled_map.vars_to_map = [v for v in get_variables() if v != "---"]
     tiled_map.colors_to_use = [c for c, v in zip(get_selected_colour_palettes(), get_variables()) if v != "---"]
-    result = tiled_map.render(legend=False, figsize=(8, 6), dpi=200)
+    result = tiled_map.render(legend=False)
     if show_map.value:
-        get_gdf().plot(ax=result.axes[0], fc="#00000000", edgecolor="#808080")
-    # result
-    mo.mpl.interactive(result)
+        get_gdf().plot(ax=result.axes[0], fc="#00000000", edgecolor="k", linewidth=0.25)
+    result
     return (result,)
 
 
@@ -819,7 +817,6 @@ def _():
 @app.cell
 def _():
     import matplotlib as mpl
-    import matplotlib.pyplot as plt
     return (mpl,)
 
 
