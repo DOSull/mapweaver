@@ -170,7 +170,7 @@ def render_tiled_map(
     tiled_map.colors_to_use = [c for c, v in zip(get_selected_colour_palettes(), get_variables()) if v != "---"]
     result = tiled_map.render(legend=False)
     if show_map.value:
-        get_gdf().plot(ax=result.axes[0], fc="#00000000", edgecolor="k", linewidth=0.25)
+        get_gdf().plot(ax=result.axes[0], fc="#00000000", edgecolor="k")
     result
     return (result,)
 
@@ -457,14 +457,8 @@ def setup_chosen_tiling_options(
 
 
 @app.cell
-def additional_tiling_options(
-    mo,
-    tile_or_weave,
-    tile_spec,
-    tiling_map,
-    tooltips,
-):
-    mo.stop(tiling_map)
+def additional_tiling_options(mo, tile_or_weave, tile_spec, tooltips):
+    # mo.stop(tiling_map)
     if tile_spec is None:
         _show_options = mo.md(f"#### No {tile_or_weave.value} options to set")
     else:
