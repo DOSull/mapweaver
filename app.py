@@ -701,21 +701,21 @@ def _(gpd, pd):
 
 @app.cell
 def _(get_gdf, math):
-    def get_spacings() -> list[int]:
+    def get_spacings() -> tuple[list[int],int]:
         """
-        Returns a list of int values to apply as steps for the spacing UI element
+        Returns a list of int values and a midpoint as settings for the spacing UI element
         """
         # returns reasonable rounded set of spacing options given the bounds of the data
-        _bb = get_gdf().total_bounds
-        _width, _height = _bb[2] - _bb[0], _bb[3] - _bb[1]
-        _max = 10 ** math.floor(math.log10(max(_width, _height))) // 5
-        _mid = _max // 2
-        _min = _max // 20
-        _stepsize1 = _min // 10
-        _stepsize2 = _min // 2
-        _steps = [x for x in range(_min, _mid, _stepsize1)] + \
-                 [x for x in range(_mid, _max + 1, _stepsize2)]
-        return _steps, 3 * _mid // 4
+        bb = get_gdf().total_bounds
+        width, height = bb[2] - bb[0], bb[3] - bb[1]
+        max_s = 10 ** math.floor(math.log10(max(width, height))) // 5
+        mid_s = max_s // 2
+        min_s = max_s // 20
+        stepsize1 = min_s // 10
+        stepsize2 = min_s // 2
+        steps = [x for x in range(min_s, mid_s, stepsize1)] + \
+                [x for x in range(mid_s, max_s + 1, stepsize2)]
+        return steps, 3 * mid_s // 4
     return (get_spacings,)
 
 
