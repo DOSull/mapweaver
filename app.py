@@ -158,16 +158,22 @@ def get_tiled_map(
 
 @app.cell
 def render_tiled_map(
+    get_gdf,
     get_selected_colour_palettes,
     get_tile_ids,
     get_variables,
+    mo,
+    show_map,
     tiled_map,
 ):
     tiled_map.ids_to_map = [id for id, v in zip(get_tile_ids(), get_variables()) if v != "---"]
     tiled_map.vars_to_map = [v for v in get_variables() if v != "---"]
     tiled_map.colors_to_use = [c for c, v in zip(get_selected_colour_palettes(), get_variables()) if v != "---"]
-    result = tiled_map.render(legend=False)
-    result
+    result = tiled_map.render(legend=False, figsize=(8, 6), dpi=200)
+    if show_map.value:
+        get_gdf().plot(ax=result.axes[0], fc="#00000000", edgecolor="#808080")
+    # result
+    mo.mpl.interactive(result)
     return (result,)
 
 
@@ -303,12 +309,14 @@ def tiling_modifier_ui_elements(mo):
     join_on_prototile = mo.ui.switch(value=False)
     clip_by_areas = mo.ui.switch(value=False)
     keep_tileables = mo.ui.switch(value=False)
+    show_map = mo.ui.switch(value=False)
     return (
         clip_by_areas,
         join_on_prototile,
         keep_tileables,
         p_inset,
         scaling_switch,
+        show_map,
         t_inset,
         tile_rotate,
         tile_scale_x,
@@ -365,10 +373,12 @@ def _(
     keep_tileables,
     mo,
     scaling_switch,
+    show_map,
     tile_or_weave,
 ):
     if tile_or_weave.value == "tiling":
         _str = f"""
+        #### {tool_tip(show_map, "Show map units as a transparent overlay.")} Show map units
         #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
         #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
         #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
@@ -376,6 +386,7 @@ def _(
         """
     else:
         _str = f"""
+        #### {tool_tip(show_map, "Show map units as a transparent overlay.")} Show map units
         #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
         #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
         #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
@@ -808,6 +819,7 @@ def _():
 @app.cell
 def _():
     import matplotlib as mpl
+    import matplotlib.pyplot as plt
     return (mpl,)
 
 
@@ -1055,7 +1067,7 @@ def setup_tilings_dictionary():
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.05.24</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.05.25</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
         mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.97</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
