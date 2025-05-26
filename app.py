@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.13.6"
+__generated_with = "0.11.30"
 app = marimo.App(
     width="full",
     app_title="MapWeaver",
@@ -11,7 +11,7 @@ app = marimo.App(
 
 
 @app.cell
-def upload_data(mo, set_input_data):
+def upload_data(mo, set_input_data, tool_tip):
     _file_browser = mo.ui.file(filetypes=[".geojson", ".json"], on_change=set_input_data, label=f"Upload")
     mo.md(f"{tool_tip(_file_browser, "Your data should be polygons. Currently only GeoJSON formatted data is readable.")}")
     return
@@ -91,7 +91,7 @@ def read_gdf(
 
 
 @app.cell
-def set_download_type(mo):
+def set_download_type(mo, tool_tip):
     download_type = mo.ui.dropdown(options=["GeoJSON", "GeoPackage", "SVG", "PNG"], value="GeoJSON")
     mo.md(f"{tool_tip(download_type, 'Set the file format for downloaded map data')}")
     return (download_type,)
@@ -107,6 +107,7 @@ def download_result(
     result,
     tiled_map,
     tiling_map,
+    tool_tip,
 ):
     mo.stop(tiling_map)
     if isinstance(get_input_data(), str) or len(get_input_data()) == 0:
@@ -177,7 +178,7 @@ def render_tiled_map(
 
 
 @app.cell
-def set_number_of_variables(mo):
+def set_number_of_variables(mo, tool_tip):
     num_tiles = mo.ui.slider(steps=[x for x in range(2, 21) if x != 17], value=4, debounce=True, show_value=True)
     mo.md(f"""
     ### General settings
@@ -268,6 +269,7 @@ def build_var_palette_mapping(
     mo,
     pals,
     rev_pals,
+    tool_tip,
     variables,
 ):
     _cols = [pal.value + ("_r" if rev.value else "") for pal, rev in zip(pals, rev_pals)]
@@ -338,6 +340,7 @@ def setup_tiling_modifiers(
     tile_skew_x,
     tile_skew_y,
     tiling_map,
+    tool_tip,
 ):
     mo.stop(tiling_map)
     if tile_or_weave.value == "tiling":
@@ -374,6 +377,7 @@ def _(
     scaling_switch,
     show_map,
     tile_or_weave,
+    tool_tip,
 ):
     if tile_or_weave.value == "tiling":
         _str = f"""
@@ -395,7 +399,7 @@ def _(
 
 
 @app.cell
-def tiling_or_weave_chooser(mo, num_tiles, tilings_by_n):
+def tiling_or_weave_chooser(mo, num_tiles, tilings_by_n, tool_tip):
     _options = list(set([v["type"] for v in tilings_by_n[num_tiles.value].values()]))
     tile_or_weave = mo.ui.dropdown(options=_options, value="tiling")
     mo.md(f"#### Pick tiling or weave {tool_tip(tile_or_weave, 'Choose tiling or a weave tiling')}")
@@ -403,7 +407,7 @@ def tiling_or_weave_chooser(mo, num_tiles, tilings_by_n):
 
 
 @app.cell
-def tiling_type_chooser(mo, num_tiles, tile_or_weave, tilings_by_n):
+def tiling_type_chooser(mo, num_tiles, tile_or_weave, tilings_by_n, tool_tip):
     _options = [k for k, v in tilings_by_n[num_tiles.value].items() if v["type"] == tile_or_weave.value]
     family = mo.ui.dropdown(options=_options, value=_options[0])
     mo.md(f"#### {tile_or_weave.value.capitalize()} type {tool_tip(family, "Choose tiling family")}")
@@ -458,7 +462,13 @@ def setup_chosen_tiling_options(
 
 
 @app.cell
-def additional_tiling_options(mo, tile_or_weave, tile_spec, tooltips):
+def additional_tiling_options(
+    mo,
+    tile_or_weave,
+    tile_spec,
+    tool_tip,
+    tooltips,
+):
     # mo.stop(tiling_map)
     if tile_spec is None:
         _show_options = mo.md(f"#### No {tile_or_weave.value} options to set")
@@ -498,7 +508,7 @@ def design_view_settings(mo):
 
 
 @app.cell
-def design_view_ui_elements(mo, view_settings):
+def design_view_ui_elements(mo, tool_tip, view_settings):
     mo.md(
         f"""
     ### Design view options
@@ -517,6 +527,7 @@ def design_view_ui_elements(mo, view_settings):
 def _(
     family,
     get_crs,
+    get_over_under,
     num_tiles,
     spacing,
     tile_or_weave,
@@ -590,22 +601,24 @@ def _(
     return (get_modded_tile_unit,)
 
 
-@app.function
-def get_over_under(pattern:str) -> int|tuple[int]:
-    """
-    Returns either an integer or tuple of integers of even length 
-    based on the supplied comma-separated string of integer values
-    """
-    # convert string over under pattern to tuple[int]
-    # if any invalid characters in string return a useful default
-    if any([not c in "0123456789," for c in pattern]): return (2, 2)
-    numbers = [int(s) for s in pattern.split(",")]
-    # has to be an even number of elements so trim if needed
-    length = 2 * len(numbers) // 2
-    if length == 0:
-        return (2, 2)
-    else:
-        return tuple(numbers[:length])
+@app.cell
+def get_over_under():
+    def get_over_under(pattern:str) -> int|tuple[int]:
+        """
+        Returns either an integer or tuple of integers of even length 
+        based on the supplied comma-separated string of integer values
+        """
+        # convert string over under pattern to tuple[int]
+        # if any invalid characters in string return a useful default
+        if any([not c in "0123456789," for c in pattern]): return (2, 2)
+        numbers = [int(s) for s in pattern.split(",")]
+        # has to be an even number of elements so trim if needed
+        length = 2 * len(numbers) // 2
+        if length == 0:
+            return (2, 2)
+        else:
+            return tuple(numbers[:length])
+    return (get_over_under,)
 
 
 @app.cell
@@ -720,19 +733,21 @@ def _(get_gdf, math):
     return (get_spacings,)
 
 
-@app.function
-def tool_tip(ele:str, tip:str) -> str:
-    """
-    Returns a HTML <span> string putting a tooltip around the supplied element 
-    """
-    # convenience function to add a tooltip to supplied string
-    return f'<span title="{tip}">{ele}</span>'
+@app.cell
+def tool_tip():
+    def tool_tip(ele:str, tip:str) -> str:
+        """
+        Returns a HTML <span> string putting a tooltip around the supplied element 
+        """
+        # convenience function to add a tooltip to supplied string
+        return f'<span title="{tip}">{ele}</span>'
+    return (tool_tip,)
 
 
 @app.cell
 def constants(CMAPS_DIVERGING, CMAPS_SEQUENTIAL, get_colour_ramp, gpd):
     ok_message = "STATUS All good!"
-    dummy_data_file = "https://raw.githubusercontent.com/DOSull/weaving-space/refs/heads/main/examples/data/dummy-data.json"
+    dummy_data_file = "https://raw.githubusercontent.com/DOSull/weaving-space/refs/heads/main/examples/data/dummy-data-2.json"
     builtin_gdf = gpd.read_file(dummy_data_file, engine="fiona")
     available_palettes = [pal for pal in CMAPS_SEQUENTIAL + CMAPS_DIVERGING if pal[-2:] != "_r" and 
                          pal not in ["berlin", "managua", "vanimo"]] # these don't seem to be in MPL3.8.4
@@ -1059,7 +1074,7 @@ def setup_tilings_dictionary():
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.05.25</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.05.26</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
         mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.97</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
