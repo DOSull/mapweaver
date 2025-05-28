@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.11.30"
+__generated_with = "0.13.6"
 app = marimo.App(
     width="full",
     app_title="MapWeaver",
@@ -11,7 +11,7 @@ app = marimo.App(
 
 
 @app.cell
-def upload_data(mo, set_input_data, tool_tip):
+def upload_data(mo, set_input_data):
     _file_browser = mo.ui.file(filetypes=[".geojson", ".json"], on_change=set_input_data, label=f"Upload")
     mo.md(f"{tool_tip(_file_browser, "Your data should be polygons. Currently only GeoJSON formatted data is readable.")}")
     return
@@ -91,7 +91,7 @@ def read_gdf(
 
 
 @app.cell
-def set_download_type(mo, tool_tip):
+def set_download_type(mo):
     download_type = mo.ui.dropdown(options=["GeoJSON", "GeoPackage", "SVG", "PNG"], value="GeoJSON")
     mo.md(f"{tool_tip(download_type, 'Set the file format for downloaded map data')}")
     return (download_type,)
@@ -107,7 +107,6 @@ def download_result(
     result,
     tiled_map,
     tiling_map,
-    tool_tip,
 ):
     mo.stop(tiling_map)
     if isinstance(get_input_data(), str) or len(get_input_data()) == 0:
@@ -146,10 +145,11 @@ def get_tiled_map(
     get_modded_tile_unit,
     join_on_prototile,
     keep_tileables,
+    map_as_icons,
     wsp,
 ):
     tiling_map = True # flag to block some other cells (potentially...)
-    tiled_map = wsp.Tiling(get_modded_tile_unit(), get_gdf()).get_tiled_map(
+    tiled_map = wsp.Tiling(get_modded_tile_unit(), get_gdf(), as_icons=map_as_icons.value).get_tiled_map(
         retain_tileables=keep_tileables.value,
         ragged_edges=not(clip_by_areas.value),
         join_on_prototiles=join_on_prototile.value)
@@ -178,7 +178,7 @@ def render_tiled_map(
 
 
 @app.cell
-def set_number_of_variables(mo, tool_tip):
+def set_number_of_variables(mo):
     num_tiles = mo.ui.slider(steps=[x for x in range(2, 21) if x != 17], value=4, debounce=True, show_value=True)
     mo.md(f"""
     ### General settings
@@ -269,7 +269,6 @@ def build_var_palette_mapping(
     mo,
     pals,
     rev_pals,
-    tool_tip,
     variables,
 ):
     _cols = [pal.value + ("_r" if rev.value else "") for pal, rev in zip(pals, rev_pals)]
@@ -306,18 +305,8 @@ def tiling_modifier_ui_elements(mo):
     tile_skew_y = mo.ui.slider(steps=range(-40, 41, 1), value=0, show_value=True, debounce=True)
     p_inset = mo.ui.slider(start=0, stop=10, step=0.1, value=0, show_value=True, debounce=True)
     t_inset = mo.ui.slider(start=0, stop=5, step = 0.1, value=0, show_value=True, debounce=True)
-    scaling_switch = mo.ui.switch(value=False)
-    join_on_prototile = mo.ui.switch(value=False)
-    clip_by_areas = mo.ui.switch(value=False)
-    keep_tileables = mo.ui.switch(value=False)
-    show_map = mo.ui.switch(value=False)
     return (
-        clip_by_areas,
-        join_on_prototile,
-        keep_tileables,
         p_inset,
-        scaling_switch,
-        show_map,
         t_inset,
         tile_rotate,
         tile_scale_x,
@@ -340,7 +329,6 @@ def setup_tiling_modifiers(
     tile_skew_x,
     tile_skew_y,
     tiling_map,
-    tool_tip,
 ):
     mo.stop(tiling_map)
     if tile_or_weave.value == "tiling":
@@ -369,37 +357,48 @@ def setup_tiling_modifiers(
 
 
 @app.cell
+def _(mo):
+    show_map = mo.ui.switch(value=False)
+    join_on_prototile = mo.ui.switch(value=False)
+    keep_tileables = mo.ui.switch(value=False)
+    clip_by_areas = mo.ui.switch(value=False)
+    spacing_mode = mo.ui.switch(value=False)
+    map_as_icons = mo.ui.switch(value=False)
+    return (
+        clip_by_areas,
+        join_on_prototile,
+        keep_tileables,
+        map_as_icons,
+        show_map,
+        spacing_mode,
+    )
+
+
+@app.cell
 def _(
     clip_by_areas,
     join_on_prototile,
     keep_tileables,
+    map_as_icons,
     mo,
-    scaling_switch,
     show_map,
-    tile_or_weave,
-    tool_tip,
+    spacing_mode,
 ):
-    if tile_or_weave.value == "tiling":
-        _str = f"""
-        #### {tool_tip(show_map, "Show map units as a transparent overlay.")} Show map units
-        #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
-        #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
-        #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
-        #### {tool_tip(scaling_switch, 'Apply scale independent of the repeat pattern.')} Scale as glyph
-        """
-    else:
-        _str = f"""
-        #### {tool_tip(show_map, "Show map units as a transparent overlay.")} Show map units
-        #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
-        #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
-        #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
-        """
-    mo.md(_str)
+    mo.md(
+        f"""
+    #### {tool_tip(show_map, "Show map units as a transparent overlay.")} Show map units
+    #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
+    #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
+    #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
+    #### {tool_tip(spacing_mode, 'Apply spacing independent of the repeat pattern.')} Scale as glyph
+    #### {tool_tip(map_as_icons, 'Place one tile glyph per map area.')} Use tile unit as icon
+    """
+    )
     return
 
 
 @app.cell
-def tiling_or_weave_chooser(mo, num_tiles, tilings_by_n, tool_tip):
+def tiling_or_weave_chooser(mo, num_tiles, tilings_by_n):
     _options = list(set([v["type"] for v in tilings_by_n[num_tiles.value].values()]))
     tile_or_weave = mo.ui.dropdown(options=_options, value="tiling")
     mo.md(f"#### Pick tiling or weave {tool_tip(tile_or_weave, 'Choose tiling or a weave tiling')}")
@@ -407,7 +406,7 @@ def tiling_or_weave_chooser(mo, num_tiles, tilings_by_n, tool_tip):
 
 
 @app.cell
-def tiling_type_chooser(mo, num_tiles, tile_or_weave, tilings_by_n, tool_tip):
+def tiling_type_chooser(mo, num_tiles, tile_or_weave, tilings_by_n):
     _options = [k for k, v in tilings_by_n[num_tiles.value].items() if v["type"] == tile_or_weave.value]
     family = mo.ui.dropdown(options=_options, value=_options[0])
     mo.md(f"#### {tile_or_weave.value.capitalize()} type {tool_tip(family, "Choose tiling family")}")
@@ -462,13 +461,7 @@ def setup_chosen_tiling_options(
 
 
 @app.cell
-def additional_tiling_options(
-    mo,
-    tile_or_weave,
-    tile_spec,
-    tool_tip,
-    tooltips,
-):
+def additional_tiling_options(mo, tile_or_weave, tile_spec, tooltips):
     # mo.stop(tiling_map)
     if tile_spec is None:
         _show_options = mo.md(f"#### No {tile_or_weave.value} options to set")
@@ -508,7 +501,7 @@ def design_view_settings(mo):
 
 
 @app.cell
-def design_view_ui_elements(mo, tool_tip, view_settings):
+def design_view_ui_elements(mo, view_settings):
     mo.md(
         f"""
     ### Design view options
@@ -527,7 +520,6 @@ def design_view_ui_elements(mo, tool_tip, view_settings):
 def _(
     family,
     get_crs,
-    get_over_under,
     num_tiles,
     spacing,
     tile_or_weave,
@@ -568,8 +560,8 @@ def _(
 def _(
     get_base_tile_unit,
     p_inset,
-    scaling_switch,
     spacing,
+    spacing_mode,
     t_inset,
     tile_or_weave,
     tile_rotate,
@@ -588,7 +580,7 @@ def _(
         if tile_or_weave.value == "tiling":
             return get_base_tile_unit() \
                .transform_rotate(tile_rotate.value) \
-               .transform_scale(tile_scale_x.value, tile_scale_y.value, scaling_switch.value) \
+               .transform_scale(tile_scale_x.value, tile_scale_y.value, spacing_mode.value) \
                .transform_skew(tile_skew_x.value, tile_skew_y.value) \
                .inset_tiles(t_inset.value * spacing.value / 100) \
                .inset_prototile(p_inset.value * spacing.value / 100)
@@ -601,24 +593,22 @@ def _(
     return (get_modded_tile_unit,)
 
 
-@app.cell
-def get_over_under():
-    def get_over_under(pattern:str) -> int|tuple[int]:
-        """
-        Returns either an integer or tuple of integers of even length 
-        based on the supplied comma-separated string of integer values
-        """
-        # convert string over under pattern to tuple[int]
-        # if any invalid characters in string return a useful default
-        if any([not c in "0123456789," for c in pattern]): return (2, 2)
-        numbers = [int(s) for s in pattern.split(",")]
-        # has to be an even number of elements so trim if needed
-        length = 2 * len(numbers) // 2
-        if length == 0:
-            return (2, 2)
-        else:
-            return tuple(numbers[:length])
-    return (get_over_under,)
+@app.function
+def get_over_under(pattern:str) -> int|tuple[int]:
+    """
+    Returns either an integer or tuple of integers of even length 
+    based on the supplied comma-separated string of integer values
+    """
+    # convert string over under pattern to tuple[int]
+    # if any invalid characters in string return a useful default
+    if any([not c in "0123456789," for c in pattern]): return (2, 2)
+    numbers = [int(s) for s in pattern.split(",")]
+    # has to be an even number of elements so trim if needed
+    length = 2 * len(numbers) // 2
+    if length == 0:
+        return (2, 2)
+    else:
+        return tuple(numbers[:length])
 
 
 @app.cell
@@ -733,15 +723,13 @@ def _(get_gdf, math):
     return (get_spacings,)
 
 
-@app.cell
-def tool_tip():
-    def tool_tip(ele:str, tip:str) -> str:
-        """
-        Returns a HTML <span> string putting a tooltip around the supplied element 
-        """
-        # convenience function to add a tooltip to supplied string
-        return f'<span title="{tip}">{ele}</span>'
-    return (tool_tip,)
+@app.function
+def tool_tip(ele:str, tip:str) -> str:
+    """
+    Returns a HTML <span> string putting a tooltip around the supplied element 
+    """
+    # convenience function to add a tooltip to supplied string
+    return f'<span title="{tip}">{ele}</span>'
 
 
 @app.cell
@@ -1074,7 +1062,7 @@ def setup_tilings_dictionary():
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.05.26</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.05.29</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
         mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.97</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
