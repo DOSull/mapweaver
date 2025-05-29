@@ -1062,8 +1062,8 @@ def setup_tilings_dictionary():
 def _(centred, mo):
     mo.vstack([
         mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.05.29</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
-        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.6.97</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
+        mo.md(f"<span title='Weaving maps of complex data'>2025.05.30</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
+        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.7.2</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
     ])
     return
 
