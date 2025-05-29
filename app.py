@@ -587,7 +587,7 @@ def _(
         else:
             return get_base_tile_unit() \
                .transform_rotate(tile_rotate.value) \
-               .transform_scale(tile_scale_x.value, tile_scale_y.value) \
+               .transform_scale(tile_scale_x.value, tile_scale_y.value, spacing_mode.value) \
                .transform_skew(tile_skew_x.value, tile_skew_y.value) \
                .inset_tiles(t_inset.value * tile_spec["aspect"].value * spacing.value / 100)
     return (get_modded_tile_unit,)
