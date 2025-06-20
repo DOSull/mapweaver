@@ -1060,11 +1060,8 @@ def setup_tilings_dictionary():
 
 @app.cell
 def _(centred, mo):
-    mo.vstack([
-        mo.image(src="mw.png").style(centred),
-        mo.md(f"<span title='Weaving maps of complex data'>2025.05.30</span>").style({'background-color':'rgba(255,255,255,0.5'}).center(),
-        mo.md(f"<span title='Requires weavingspace 0.0.6.73'>0.0.7.2</span>").style({'background-color':'rgba(255,255,255,0.5','font-style':'italic'}).center(),
-    ])
+    mo.vstack([mo.image(src="mw.png").style(centred),
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;'><span title='Weaving maps of complex data'>2025.05.30 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.2</a></span></p>")]).center()
     return
 
 
