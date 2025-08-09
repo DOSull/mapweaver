@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.13.6"
+__generated_with = "0.14.10"
 app = marimo.App(
     width="full",
     app_title="MapWeaver",
@@ -390,7 +390,7 @@ def _(
     #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
     #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
     #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
-    #### {tool_tip(spacing_mode, 'Apply spacing independent of the repeat pattern.')} Scale as glyph
+    #### {tool_tip(spacing_mode, 'Apply spacing of repeat pattern regardless of any scaling.')} Scale as glyph
     #### {tool_tip(map_as_icons, 'Place one tile glyph per map area.')} Use tile unit as icon
     """
     )
@@ -1061,7 +1061,7 @@ def setup_tilings_dictionary():
 @app.cell
 def _(centred, mo):
     mo.vstack([mo.image(src="mw.png").style(centred),
-               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;'><span title='Weaving maps of complex data'>2025.05.30 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.2</a></span></p>")]).center()
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;'><span title='Weaving maps of complex data'>2025.08.10 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.3</a></span></p>")]).center()
     return
 
 
