@@ -422,7 +422,7 @@ def setup_chosen_tiling_options(
     tilings_by_n,
 ):
     if "slice" in family.value:
-        _offset = mo.ui.slider(steps=[x / 100 for x in range(101)], value=0, label="#### Offset", show_value=True, debounce=True) 
+        _offset = mo.ui.slider(steps=[x / 100 for x in range(-100, 101)], value=0, label="#### Offset", show_value=True, debounce=True) 
     elif "dissect" in family.value:
         _offset = mo.ui.number(start=0, stop=1, value=0, label="#### Offset", debounce=True)
         if "hex" in family.value:
@@ -1061,7 +1061,7 @@ def setup_tilings_dictionary():
 @app.cell
 def _(centred, mo):
     mo.vstack([mo.image(src="mw.png").style(centred),
-               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;'><span title='Weaving maps of complex data'>2025.08.10 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.3</a></span></p>")]).center()
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;'><span title='Weaving maps of complex data'>2025.08.10 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.5</a></span></p>")]).center()
     return
 
 
