@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.14.10"
+__generated_with = "0.16.5"
 app = marimo.App(
     width="full",
     app_title="MapWeaver",
@@ -335,22 +335,22 @@ def setup_tiling_modifiers(
         _str = f"""
             #### Spacing {tool_tip(spacing, 'In units of the map CRS, the approximate dimension of the repeating group.')}
             #### Rotate by {tool_tip(tile_rotate, 'Rotate tiling (degrees). The tile group is rotated before any scaling or skew transforms are applied.')}
+            #### Group inset {tool_tip(p_inset, 'Inset the tile group (% spacing).')}
+            #### Tiles inset {tool_tip(t_inset, 'Inset individual tiles (% spacing).')}
             #### Scale EW {tool_tip(tile_scale_x, 'Scale in the x direction.')}
             #### Scale NS {tool_tip(tile_scale_y, 'Scale in the y direction.')}
             #### Skew EW {tool_tip(tile_skew_x, 'Skew in the x direction (degrees).')}
             #### Skew NS {tool_tip(tile_skew_y, 'Skew in the y direction (degrees).')}
-            #### Group inset {tool_tip(p_inset, 'Inset the tile group (% spacing).')}
-            #### Tiles inset {tool_tip(t_inset, 'Inset individual tiles (% spacing).')}
             """
     else:
         _str = f"""
             #### Spacing {tool_tip(spacing, 'In units of the map CRS, the distance between strand centre lines.')}
             #### Rotate by {tool_tip(tile_rotate, "'Rotate weave (degrees). The weave is rotated before any scaling or skew transforms are applied.'")}
+            #### Strands inset {tool_tip(t_inset, "'Inset strands (% width).'")}
             #### Scale EW {tool_tip(tile_scale_x, "'Scale in the x direction.'")}
             #### Scale NS {tool_tip(tile_scale_y, "'Scale in the y direction.'")}
             #### Skew EW {tool_tip(tile_skew_x, "'Skew in the x direction (degrees).'")}
             #### Skew NS {tool_tip(tile_skew_y, "'Skew in the y direction (degrees).'")}
-            #### Strands inset {tool_tip(t_inset, "'Inset strands (% width).'")}
             """
     mo.md(_str)
     return
@@ -434,7 +434,7 @@ def setup_chosen_tiling_options(
     elif "weave" in family.value:
         _aspect = mo.ui.slider(steps=[round(_/12, 3) for _ in range(1, 13)], value=0.75, label="#### Strand width", show_value=True, debounce=True)
         if not "cube" in family.value:
-            _over_under = mo.ui.text(value=tilings_by_n[num_tiles.value][family.value]["n"], label="#### Over-under pattern")
+            _over_under = mo.ui.text(value=tilings_by_n[num_tiles.value][family.value]["n"], label="#### Over-under")
 
     if tile_or_weave.value == "tiling":
         if "slice" in family.value:
@@ -510,7 +510,7 @@ def design_view_ui_elements(mo, view_settings):
     #### {tool_tip(view_settings['show_vectors'], 'Show the translations that map repeating tiles in the pattern onto one another.')} Show vectors
     #### {tool_tip(view_settings['show_reg_prototile'], 'Show in a red outline the repeating set tile group that pieces together jigsaw-like to form the pattern.')} Show &lsquo;jigsaw piece&rsquo;
     #### {tool_tip(view_settings['show_scale'], 'Give an indication of scale in map units.')} Show scale
-    #### Tile group 'shells' to show {tool_tip(view_settings['radius'], 'The number of &lsquo;shells&rsquo; of the tiling to show around the base tile group.')}
+    #### Tile unit 'shells' to show {tool_tip(view_settings['radius'], 'The number of &lsquo;shells&rsquo; of the tiling to show around the base tile group.')}
     """
     )
     return
@@ -893,8 +893,8 @@ def setup_tilings_dictionary():
         "archimedean 3.12.12": dict(type="tiling", tiling_type="archi", code="3.12.12"),
         "square-slice 3": dict(type="tiling", tiling_type="square-slice", n=3, offset=0),
         "archimedean 3.3.3.4.4": dict(type="tiling", tiling_type="archi", code="3.3.3.4.4"),
-        "hex-dissection 3": dict(type="tiling", tiling_type="hex-dissect", n=3, offset=0, offset_angle=0),
-        "square-dissection 3": dict(type="tiling", tiling_type="square-dissect", n=3, offset=0, offset_angle=0),
+        # "hex-dissection 3": dict(type="tiling", tiling_type="hex-dissect", n=3, offset=0, offset_angle=0),
+        # "square-dissection 3": dict(type="tiling", tiling_type="square-dissect", n=3, offset=0, offset_angle=0),
         "star1 33": dict(type="tiling", tiling_type="star1", code="33", point_angle=30),
         "star2 66": dict(type="tiling", tiling_type="star2", code="66"),
         "star1 36": dict(type="tiling", tiling_type="star1", code="36", point_angle=30),
@@ -923,7 +923,7 @@ def setup_tilings_dictionary():
         "star2 464": dict(type="tiling", tiling_type="star2", code="464"),
         "star2 844": dict(type="tiling", tiling_type="star2", code="844"),
         "hex-slice 4": dict(type="tiling", tiling_type="hex-slice", n=4, offset=0),
-        "hex-dissection 4": dict(type="tiling", tiling_type="hex-dissect", n=4, offset=0, offset_angle=0),
+        # "hex-dissection 4": dict(type="tiling", tiling_type="hex-dissect", n=4, offset=0, offset_angle=0),
       },
       5: {
         "square-colouring 5": dict(type="tiling", tiling_type="square-col", n=5),
@@ -940,7 +940,7 @@ def setup_tilings_dictionary():
         "hex-colouring 5": dict(type="tiling", tiling_type="hex-col", n=5),
         "hex-slice 5": dict(type="tiling", tiling_type="hex-slice", n=5, offset=0),
         "square-slice 5": dict(type="tiling", tiling_type="square-slice", n=5, offset=0),
-        "square-dissection 5": dict(type="tiling", tiling_type="square-dissect", n=5, offset=0, offset_angle=0),
+        # "square-dissection 5": dict(type="tiling", tiling_type="square-dissect", n=5, offset=0, offset_angle=0),
       },
       6: {
         "hex-slice 6": dict(type="tiling", tiling_type="hex-slice", n=6, offset=0),
@@ -982,7 +982,7 @@ def setup_tilings_dictionary():
         "square-colouring 7": dict(type="tiling", tiling_type="square-col", n=7),
         "hex-slice 7": dict(type="tiling", tiling_type="hex-slice", n=7, offset=0),
         "square-slice 7": dict(type="tiling", tiling_type="square-slice", n=7, offset=0),
-        "hex-dissection 7": dict(type="tiling", tiling_type="hex-dissect", n=7, offset=0, offset_angle=0),
+        # "hex-dissection 7": dict(type="tiling", tiling_type="hex-dissect", n=7, offset=0, offset_angle=0),
       },
       8: {
         "square-slice 8": dict(type="tiling", tiling_type="square-slice", n=8, offset=0),
@@ -1007,8 +1007,8 @@ def setup_tilings_dictionary():
         "plain weave abcde|fghi": dict(type="weave", weave_type="plain", strands="abcde|fghi", n="1"),
         "plain weave abcde-|fghi": dict(type="weave", weave_type="plain", strands="abcde-|fghi", n="1"),
         "plain weave abcde-|fghi-": dict(type="weave", weave_type="plain", strands="abcde-|fghi-", n="1"),
-        "hex-dissection 9": dict(type="tiling", tiling_type="hex-dissect", n=9, offset=0, offset_angle=0),
-        "square-dissection 9": dict(type="tiling", tiling_type="square-dissect", n=9, offset=0, offset_angle=0),
+        # "hex-dissection 9": dict(type="tiling", tiling_type="hex-dissect", n=9, offset=0, offset_angle=0),
+        # "square-dissection 9": dict(type="tiling", tiling_type="square-dissect", n=9, offset=0, offset_angle=0),
       },
       10: {
         "hex-colouring 10": dict(type="tiling", tiling_type="hex-col", n=10),
@@ -1061,7 +1061,7 @@ def setup_tilings_dictionary():
 @app.cell
 def _(centred, mo):
     mo.vstack([mo.image(src="mw.png").style(centred),
-               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;'><span title='Weaving maps of complex data'>2025.08.10 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.11</a></span></p>")]).center()
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;'><span title='Weaving maps of complex data'>2025.11.11 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a></span></p>")]).center()
     return
 
 
