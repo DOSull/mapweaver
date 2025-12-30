@@ -305,8 +305,8 @@ def tiling_modifier_ui_elements(mo):
     tile_rotate = mo.ui.slider(steps=range(-90, 91, 1), value=0, show_value=True, debounce=True)
     tile_scale_x = mo.ui.slider(steps = [_/50 for _ in range(25, 50)] + [_/10 for _ in range(10, 41)], value=1, show_value=True, debounce=True)
     tile_scale_y = mo.ui.slider(steps = [_/50 for _ in range(25, 50)] + [_/10 for _ in range(10, 41)], value=1, show_value=True, debounce=True)
-    tile_skew_x = mo.ui.slider(steps=range(-40, 41, 1), value=0, show_value=True, debounce=True)
-    tile_skew_y = mo.ui.slider(steps=range(-40, 41, 1), value=0, show_value=True, debounce=True)
+    tile_skew_x = mo.ui.slider(steps=range(-45, 46, 1), value=0, show_value=True, debounce=True)
+    tile_skew_y = mo.ui.slider(steps=range(-45, 46, 1), value=0, show_value=True, debounce=True)
     p_inset = mo.ui.slider(start=0, stop=10, step=0.1, value=0, show_value=True, debounce=True)
     t_inset = mo.ui.slider(start=0, stop=5, step = 0.1, value=0, show_value=True, debounce=True)
     return (
@@ -1061,7 +1061,7 @@ def setup_tilings_dictionary():
 @app.cell
 def _(centred, mo):
     mo.vstack([mo.image(src="mw.png").style(centred),
-               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2025.11.12 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a> and <a href='https://marimo.io'>marimo 0.17.7</a></p>")]).center()
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2025.12.31 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a> and <a href='https://marimo.io'>marimo 0.17.7</a></p>")]).center()
     return
 
 
