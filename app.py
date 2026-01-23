@@ -940,7 +940,7 @@ def setup_tilings_dictionary():
         "hex-colouring 5": dict(type="tiling", tiling_type="hex-col", n=5),
         "hex-slice 5": dict(type="tiling", tiling_type="hex-slice", n=5, offset=0),
         "square-slice 5": dict(type="tiling", tiling_type="square-slice", n=5, offset=0),
-        # "square-dissection 5": dict(type="tiling", tiling_type="square-dissect", n=5, offset=0, offset_angle=0),
+        "square-dissection 5": dict(type="tiling", tiling_type="square-dissect", n=5, offset=0, offset_angle=0),
       },
       6: {
         "hex-slice 6": dict(type="tiling", tiling_type="hex-slice", n=6, offset=0),
@@ -982,7 +982,7 @@ def setup_tilings_dictionary():
         "square-colouring 7": dict(type="tiling", tiling_type="square-col", n=7),
         "hex-slice 7": dict(type="tiling", tiling_type="hex-slice", n=7, offset=0),
         "square-slice 7": dict(type="tiling", tiling_type="square-slice", n=7, offset=0),
-        # "hex-dissection 7": dict(type="tiling", tiling_type="hex-dissect", n=7, offset=0, offset_angle=0),
+        "hex-dissection 7": dict(type="tiling", tiling_type="hex-dissect", n=7, offset=0, offset_angle=0),
       },
       8: {
         "square-slice 8": dict(type="tiling", tiling_type="square-slice", n=8, offset=0),
@@ -1007,8 +1007,8 @@ def setup_tilings_dictionary():
         "plain weave abcde|fghi": dict(type="weave", weave_type="plain", strands="abcde|fghi", n="1"),
         "plain weave abcde-|fghi": dict(type="weave", weave_type="plain", strands="abcde-|fghi", n="1"),
         "plain weave abcde-|fghi-": dict(type="weave", weave_type="plain", strands="abcde-|fghi-", n="1"),
-        # "hex-dissection 9": dict(type="tiling", tiling_type="hex-dissect", n=9, offset=0, offset_angle=0),
-        # "square-dissection 9": dict(type="tiling", tiling_type="square-dissect", n=9, offset=0, offset_angle=0),
+        "hex-dissection 9": dict(type="tiling", tiling_type="hex-dissect", n=9, offset=0, offset_angle=0),
+        "square-dissection 9": dict(type="tiling", tiling_type="square-dissect", n=9, offset=0, offset_angle=0),
       },
       10: {
         "hex-colouring 10": dict(type="tiling", tiling_type="hex-col", n=10),
@@ -1061,7 +1061,7 @@ def setup_tilings_dictionary():
 @app.cell
 def _(centred, mo):
     mo.vstack([mo.image(src="mw.png").style(centred),
-               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2025.12.31 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a> and <a href='https://marimo.io'>marimo 0.17.7</a></p>")]).center()
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2026.01.31 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a> and <a href='https://marimo.io'>marimo 0.17.7</a></p>")]).center()
     return
 
 
