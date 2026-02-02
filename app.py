@@ -394,7 +394,7 @@ def _(
     #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
     #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
     #### {tool_tip(spacing_mode, 'Apply spacing of repeat pattern regardless of any scaling.')} Scale as glyph
-    #### {tool_tip(map_as_icons, 'Place one tile glyph per map area.')} Use tile unit as icon
+    #### {tool_tip(map_as_icons, 'Place one tile glyph per map area.')} Use tileable as icon
     """)
     return
 
@@ -511,7 +511,7 @@ def design_view_ui_elements(mo, view_settings):
     #### {tool_tip(view_settings['show_vectors'], 'Show the translations that map repeating tiles in the pattern onto one another.')} Show vectors
     #### {tool_tip(view_settings['show_reg_prototile'], 'Show in a red outline the repeating set tile group that pieces together jigsaw-like to form the pattern.')} Show &lsquo;jigsaw piece&rsquo;
     #### {tool_tip(view_settings['show_scale'], 'Give an indication of scale in map units.')} Show scale
-    #### Tile unit 'shells' to show {tool_tip(view_settings['radius'], 'The number of &lsquo;shells&rsquo; of the tiling to show around the base tile group.')}
+    #### Tileable 'shells' to show {tool_tip(view_settings['radius'], 'The number of &lsquo;shells&rsquo; of the tiling to show around the base tile group.')}
     """)
     return
 
@@ -1061,7 +1061,7 @@ def setup_tilings_dictionary():
 @app.cell
 def _(centred, mo):
     mo.vstack([mo.image(src="mw.png").style(centred),
-               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2026.01.31 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a> and <a href='https://marimo.io'>marimo 0.17.7</a></p>")]).center()
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2026.02.02 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a> and <a href='https://marimo.io'>marimo 0.17.7</a></p>")]).center()
     return
 
 
