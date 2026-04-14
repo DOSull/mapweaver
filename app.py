@@ -685,7 +685,8 @@ def _(io, mo, mpl):
         # this code based on code in matplotlib docs at
         # https://matplotlib.org/stable/users/explain/colors/colormaps.html
         xy = [[x / 256 for x in range(257)] for i in range(2)]
-        ax.imshow(xy, aspect=30, cmap=mpl.colormaps.get(pal_name + ("_r" if rev else "")))
+        # ax.imshow(xy, aspect=30, cmap=mpl.colormaps.get(pal_name + ("_r" if rev else "")))
+        ax.imshow(xy, aspect=30, cmap=mpl.colormaps[f"{pal_name}{'_r' if rev else ''}"])
         ax.set_axis_off()
         # write to memory and embed in a marimo image object
         with io.BytesIO() as buf:
@@ -825,6 +826,7 @@ def _():
 @app.cell
 def _():
     import matplotlib as mpl
+    import cmcrameri as cmc
 
     return (mpl,)
 
@@ -1078,7 +1080,7 @@ def setup_tilings_dictionary():
 @app.cell
 def _(centred, mo):
     mo.vstack([mo.image(src="mw.png").style(centred),
-               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2026.04.14 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.37</a> and <a href='https://marimo.io'>marimo 0.23.1</a></p>")]).center()
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2026.04.14 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.41</a> and <a href='https://marimo.io'>marimo 0.23.1</a></p>")]).center()
     return
 
 
