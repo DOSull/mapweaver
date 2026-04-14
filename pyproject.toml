@@ -5,6 +5,5 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "marimo>=0.20.4",
-    "weavingspace>=0.0.7.19",
+    "marimo>=0.23.1",
 ]
