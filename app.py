@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.17.1"
+__generated_with = "0.23.1"
 app = marimo.App(
     width="full",
     app_title="MapWeaver",
@@ -189,7 +189,9 @@ def set_number_of_variables(mo):
 
 @app.cell
 def variable_palette_map_header(mo):
-    mo.md(f"""### Variables &lrarr; palettes""")
+    mo.md(f"""
+    ### Variables &lrarr; palettes
+    """)
     return
 
 
@@ -292,7 +294,9 @@ def set_spacing_limits(get_spacings, mo):
 
 @app.cell
 def _(mo, tile_or_weave):
-    mo.md(f"""### {tile_or_weave.value.capitalize()} modifiers""")
+    mo.md(f"""
+    ### {tile_or_weave.value.capitalize()} modifiers
+    """)
     return
 
 
@@ -384,16 +388,14 @@ def _(
     show_map,
     spacing_mode,
 ):
-    mo.md(
-        f"""
+    mo.md(f"""
     #### {tool_tip(show_map, "Show map units as a transparent overlay.")} Show map units
     #### {tool_tip(join_on_prototile, "Base joining data on the tileable unit, not the tiles.")} Join using tileable
     #### {tool_tip(keep_tileables, "Retain the tileable units even where a tile element does not intersect a map area. Only makes sense if 'Join using tileable' is set on.")} Retain tileables
     #### {tool_tip(clip_by_areas, "Show tiles at map edges, not map areas.")} Clip by map units
     #### {tool_tip(spacing_mode, 'Apply spacing of repeat pattern regardless of any scaling.')} Scale as glyph
     #### {tool_tip(map_as_icons, 'Place one tile glyph per map area.')} Use tileable as icon
-    """
-    )
+    """)
     return
 
 
@@ -502,8 +504,7 @@ def design_view_settings(mo):
 
 @app.cell
 def design_view_ui_elements(mo, view_settings):
-    mo.md(
-        f"""
+    mo.md(f"""
     ### Design view options
     #### {tool_tip(view_settings['show_ids'], 'Show the tiling element labels used to match tiles to variables in the map data.')} Show tile IDs
     #### {tool_tip(view_settings['show_prototile'], 'Show in fine black outline the simple tile (usually a square or hexagon) which forms the basis of the pattern.')} Show base tile
@@ -511,8 +512,7 @@ def design_view_ui_elements(mo, view_settings):
     #### {tool_tip(view_settings['show_reg_prototile'], 'Show in a red outline the repeating set tile group that pieces together jigsaw-like to form the pattern.')} Show &lsquo;jigsaw piece&rsquo;
     #### {tool_tip(view_settings['show_scale'], 'Give an indication of scale in map units.')} Show scale
     #### Tileable 'shells' to show {tool_tip(view_settings['radius'], 'The number of &lsquo;shells&rsquo; of the tiling to show around the base tile group.')}
-    """
-    )
+    """)
     return
 
 
@@ -553,6 +553,7 @@ def _(
                 aspect=tile_spec["aspect"].value,
                 crs=get_crs())
         return result
+
     return (get_base_tile_unit,)
 
 
@@ -590,6 +591,7 @@ def _(
                .transform_scale(tile_scale_x.value, tile_scale_y.value, spacing_mode.value) \
                .transform_skew(tile_skew_x.value, tile_skew_y.value) \
                .inset_tiles(t_inset.value * tile_spec["aspect"].value * spacing.value / 100)
+
     return (get_modded_tile_unit,)
 
 
@@ -641,6 +643,7 @@ def _(get_selected_colour_palettes, mpl, num_tiles, view_settings, wsp):
         if len(blanks) > 0:
             tiles.tiles.loc[tiles.tiles["tile_id"].isin(blanks)].plot(ax = ax, fc="#00000000", hatch="////", ec="lightgrey")
         return ax
+
     return (plot_tiles,)
 
 
@@ -652,6 +655,7 @@ def _(get_gdf, get_numeric_variables):
         by the number of available numeric variables in the data
         """
         return list("abcdefghijklmnopqrstuvwxyz")[:len(get_numeric_variables(get_gdf()))]
+
     return (get_tile_ids,)
 
 
@@ -664,6 +668,7 @@ def _(num_tiles, pals, rev_pals):
         """
         return [(p if not r else p + "_r") 
                 for p, r in zip(pals.value[:num_tiles.value], rev_pals.value[:num_tiles.value])]
+
     return (get_selected_colour_palettes,)
 
 
@@ -689,6 +694,7 @@ def _(io, mo, mpl):
             mpl.pyplot.close(fig)
             img = mo.image(buf)
         return img
+
     return (get_colour_ramp,)
 
 
@@ -701,6 +707,7 @@ def _(gpd, pd):
         """
         return [col for col in _gdf.columns if not "geom" in col 
                 and pd.api.types.is_numeric_dtype(_gdf[col].dtype)]
+
     return (get_numeric_variables,)
 
 
@@ -721,6 +728,7 @@ def _(get_gdf, math):
         steps = [x for x in range(min_s, mid_s, stepsize1)] + \
                 [x for x in range(mid_s, max_s + 1, stepsize2)]
         return steps, 3 * mid_s // 4
+
     return (get_spacings,)
 
 
@@ -804,48 +812,56 @@ def _(mo):
 @app.cell
 def module_imports():
     import io                     # for in-memory loading of inputs and outputs
+
     return (io,)
 
 
 @app.cell
 def _():
     from pathlib import Path
+
     return (Path,)
 
 
 @app.cell
 def _():
     import matplotlib as mpl
+
     return (mpl,)
 
 
 @app.cell
 def _():
     import math
+
     return (math,)
 
 
 @app.cell
 def _():
     import pandas as pd
+
     return (pd,)
 
 
 @app.cell
 def _():
     import geopandas as gpd
+
     return (gpd,)
 
 
 @app.cell
 def _():
     from shapely import is_valid
+
     return (is_valid,)
 
 
 @app.cell
 def _():
     import weavingspace as wsp
+
     return (wsp,)
 
 
@@ -853,6 +869,7 @@ def _():
 def _():
     from weavingspace import CMAPS_SEQUENTIAL
     from weavingspace import CMAPS_DIVERGING
+
     return CMAPS_DIVERGING, CMAPS_SEQUENTIAL
 
 
@@ -1062,7 +1079,7 @@ def setup_tilings_dictionary():
 @app.cell
 def _(centred, mo):
     mo.vstack([mo.image(src="mw.png").style(centred),
-               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2026.04.14 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a> and <a href='https://marimo.io'>marimo 0.17.1</a></p>")]).center()
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2026.04.15 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a> and <a href='https://marimo.io'>marimo 0.23.1</a></p>")]).center()
     return
 
 
@@ -1081,6 +1098,7 @@ def _():
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
