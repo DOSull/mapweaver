@@ -859,7 +859,15 @@ def _():
 
 
 @app.cell
-def _():
+async def _():
+    import os
+    if os.environ["HOME"] == "/home/pyodide":
+        import micropip
+        await micropip.install(["weavingspace"])
+    else:
+        import subprocess
+        import sys
+        subprocess.run([sys.executable,"-m","pip","install","-r","weavingspace"],capture_output=True)
     import weavingspace as wsp
 
     return (wsp,)
