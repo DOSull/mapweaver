@@ -1087,7 +1087,7 @@ def setup_tilings_dictionary():
 @app.cell
 def _(centred, mo):
     mo.vstack([mo.image(src="mw.png").style(centred),
-               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2026.04.15 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.19</a> and <a href='https://marimo.io'>marimo 0.23.1</a></p>")]).center()
+               mo.md(f"<p style='font-style:italic;text-align:center;line-height:1.2em;' title='Weaving maps of complex data'>2026.04.15 built with <a href='https://github.com/DOSull/weaving-space' target='_blank'>weavingspace 0.0.7.47</a> and <a href='https://marimo.io'>marimo 0.23.1</a></p>")]).center()
     return
 
 
