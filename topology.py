@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.14.16"
+__generated_with = "0.23.1"
 app = marimo.App(width="medium", layout_file="layouts/topology.grid.json")
 
 
@@ -12,7 +12,9 @@ def _(TileUnit):
 
 @app.cell
 def _(mo):
-    mo.md("""## The original tiling""")
+    mo.md("""
+    ## The original tiling
+    """)
     return
 
 
@@ -37,12 +39,10 @@ def _(Topology, unit_0):
 
 @app.cell
 def _(mo):
-    mo.md(
-        """
+    mo.md("""
     ## Its topology
     Showing vertices and edges labelled by their topological position in the tiling. Identically labelled elements are topologically equivalent.
-    """
-    )
+    """)
     return
 
 
@@ -63,7 +63,9 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md("""## The tiling transformed""")
+    mo.md("""
+    ## The tiling transformed
+    """)
     return
 
 
@@ -93,12 +95,14 @@ def _(topo_1):
 def _():
     from weavingspace import TileUnit
     from weavingspace import Topology
+
     return TileUnit, Topology
 
 
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
